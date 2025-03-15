@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload CSV</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 40%;
+            margin: auto;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            margin-top: 50px;
+        }
+
+        label,
+        input,
+        button {
+            display: block;
+            margin: 10px auto;
+        }
+
+        input {
+            padding: 8px;
+            width: 80%;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .error {
+            color: red;
+            display: none;
+            font-size: 14px;
+        }
+
+        #submit-btn {
+            position: relative;
+            padding: 10px 20px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        #submit-btn:hover {
+            background: #218838;
+        }
+
+        #preview {
+            margin-top: 20px;
+            display: none;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        #preview th,
+        #preview td {
+            border: 1px solid black;
+            padding: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Upload CSV</h2>
+        <label>Cust:</label>
+        <input type="text" id="cust">
+        <span class="error" id="cust-error">Please enter Cust</span>
+
+        <label>Project ID:</label>
+        <input type="text" id="project_id">
+        <span class="error" id="project-error">Please enter Project ID</span>
+
+        <label>Batch ID:</label>
+        <input type="text" id="batch_id">
+        <span class="error" id="batch-error">Please enter Batch ID</span>
+
+        <label>Upload CSV:</label>
+        <input type="file" id="file" accept=".csv">
+        <span class="error" id="file-error">Please upload file</span>
+
+        <table id="preview"></table>
+        <button id="submit-btn">Submit</button>
+    </div>
+
+    <script>
+        function validateForm() {
+            let isValid = true;
+            $(".error").hide();
+
+            if ($("#cust").val().trim() === "") {
+                $("#cust-error").show();
+                isValid = false;
+            }
+            if ($("#project_id").val().trim() === "") {
+                $("#project-error").show();
+                isValid = false;
+            }
+            if ($("#batch_id").val().trim() === "") {
+                $("#batch-error").show();
+                isValid = false;
+            }
+            if ($("#file")[0].files.length === 0) {
+                $("#file-error").show();
+                isValid = false;
+            }
+
+            if (!isValid) {
+                let x = Math.random() * (window.innerWidth - 100);
+                let y = Math.random() * (window.innerHeight - 50);
+                $("#submit-btn").css({ left: x + "px", top: y + "px", position: "absolute" });
+            }
+            return isValid;
+        }
+
+        $("#submit-btn").click(function () {
+            if (!validateForm()) return;
+            if (!confirm("Are you sure to submit data?")) return;
+
+            let formData = new FormData();
+            formData.append("cust", $("#cust").val().trim());
+            formData.append("project_id", $("#project_id").val().trim());
+            formData.append("batch_id", $("#batch_id").val().trim());
+            formData.append("file", $("#file")[0].files[0]);
+
+            $.ajax({
+                url: "/upload",
+                type: "POST",
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function (response) {
+                    alert("Upload successfully!");
+                },
+                error: function (xhr, status, error) {
+                    alert("Failed to upload: " + error);
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

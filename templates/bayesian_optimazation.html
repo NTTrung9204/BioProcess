@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Bayesian Optimization</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+    <style>
+        .container {
+            margin-top: 20px;
+        }
+
+        .left-panel {
+            border-right: 1px solid #ccc;
+        }
+
+        .right-panel {
+            padding-left: 20px;
+        }
+
+        .table-container {
+            max-height: 600px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+
+        .highlight {
+            background-color: #ffeb3b !important;
+        }
+
+        @media screen and (max-width: 1300px) {
+            #resize{
+                align-items: center;
+                justify-content: center;
+                gap: 50px;
+            }
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.4/socket.io.js"></script>
+</head>
+
+<body>
+    <div style="width: 100%; padding: 55px;">
+        {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endif %}
+        {% if message %}
+        <div class="alert alert-info">{{ message }}</div>
+        {% endif %}
+        <div id="resize" class="row">
+            <div style="min-width: 500px;" class="col-md-5 left-panel">
+                <h3>Data Input</h3>
+                <form method="post">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Feature</th>
+                                <th>Min</th>
+                                <th>Max</th>
+                                <th>Fix</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for feature, vals in data.items() %}
+                            <tr>
+                                <td>{{ feature }}</td>
+                                <td><input type="text" name="{{ feature }}_min" value="{{ vals.min }}"
+                                        class="form-control"></td>
+                                <td><input type="text" name="{{ feature }}_max" value="{{ vals.max }}"
+                                        class="form-control"></td>
+                                <td><input type="text" name="{{ feature }}_fix" value="{{ vals.fix }}"
+                                        class="form-control"></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </form>
+            </div>
+            <div class="col-md-7 right-panel">
+                <h3>Realtime Optimization Results</h3>
+                <canvas id="optimizationChart" width="400" height="300"></canvas>
+            </div>
+
+            <div class="col-md-8 right-panel" style="margin: 100px auto;">
+                <h3>Realtime Trial Data</h3>
+                <div class="table-container">
+                    <table class="table table-striped" id="trialTable">
+                        <thead>
+                            <tr>
+                                <th>Target</th>
+                                <th>Feature 1</th>
+                                <th>Feature 2</th>
+                                <th>Feature 3</th>
+                                <th>Feature 4</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        var socket = io();
+
+        var canvas = document.getElementById('optimizationChart');
+
+        var ctx = document.getElementById('optimizationChart').getContext('2d');
+        var chartData = {
+            labels: [],
+            datasets: [{
+                label: 'Penicillin Value',
+                data: [],
+                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                fill: false,
+                tension: 0.1
+            }]
+        };
+        var optimizationChart = new Chart(ctx, {
+            type: 'line',
+            data: chartData,
+            options: {
+                scales: {
+                    x: {
+                        title: { display: true, text: 'Trial' }
+                    },
+                    y: {
+                        title: { display: true, text: 'Penicillin Value' }
+                    }
+                },
+                plugins: {
+                    zoom: {
+                        pan: {
+                            enabled: true,
+                            mode: 'x', 
+                            threshold: 10
+                        },
+                        zoom: {
+                            wheel: {
+                                enabled: true, 
+                                speed: 0.1  
+                            },
+                            pinch: {
+                                enabled: true 
+                            },
+                            mode: 'x',      
+                            limits: {
+                                x: { min: 'original', max: 'original', minRange: 1 }
+                            },
+                        },
+                        limits: {
+                            x: { minRange: 1 },
+                        },
+                    }
+                },
+                interaction: {
+                    mode: 'nearest',
+                    intersect: false
+                }
+            },
+            plugins: [{
+                id: 'reset-zoom-button',
+                beforeDraw: function (chart) {
+                    const ctx = chart.ctx;
+                    const canvas = chart.canvas;
+
+                    if (chart._zoom && chart._zoom.scale) {
+                        const text = 'Reset Zoom';
+                        const padding = 8;
+                        const textWidth = ctx.measureText(text).width;
+                        const buttonWidth = textWidth + padding * 2;
+                        const buttonHeight = 25;
+                        const x = canvas.width - buttonWidth - 10;
+                        const y = 10;
+
+                        ctx.fillStyle = 'rgba(200, 200, 200, 0.8)';
+                        ctx.fillRect(x, y, buttonWidth, buttonHeight);
+
+                        ctx.fillStyle = '#333';
+                        ctx.font = '12px Arial';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText(text, x + buttonWidth / 2, y + buttonHeight / 2);
+
+                        chart.resetZoomButton = {
+                            x: x,
+                            y: y,
+                            width: buttonWidth,
+                            height: buttonHeight
+                        };
+                    }
+                }
+            }]
+        });
+
+        canvas.addEventListener('dblclick', function () {
+            optimizationChart.resetZoom();
+        });
+
+        canvas.addEventListener('click', function (e) {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            if (optimizationChart.resetZoomButton &&
+                x >= optimizationChart.resetZoomButton.x &&
+                x <= optimizationChart.resetZoomButton.x + optimizationChart.resetZoomButton.width &&
+                y >= optimizationChart.resetZoomButton.y &&
+                y <= optimizationChart.resetZoomButton.y + optimizationChart.resetZoomButton.height) {
+                optimizationChart.resetZoom();
+            }
+        });
+
+
+        var currentBest = -Infinity;
+        var trialCount = 0;
+        var tableHeaderInitialized = false;
+
+        function initTableHeader(featureNames) {
+            var thead = document.getElementById('trialTable').getElementsByTagName('thead')[0];
+            thead.innerHTML = "";
+            var headerRow = document.createElement('tr');
+            var thIndex = document.createElement('th');
+            thIndex.textContent = "STT";
+            headerRow.appendChild(thIndex);
+            var thObj = document.createElement('th');
+            thObj.textContent = "Penicillin";
+            headerRow.appendChild(thObj);
+            featureNames.forEach(function (name) {
+                var th = document.createElement('th');
+                th.textContent = name;
+                headerRow.appendChild(th);
+            });
+            thead.appendChild(headerRow);
+            tableHeaderInitialized = true;
+        }
+
+        function updateTableHighlight() {
+            var tbody = document.getElementById('trialTable').getElementsByTagName('tbody')[0];
+            for (var i = 0; i < tbody.rows.length; i++) {
+                var row = tbody.rows[i];
+                var objVal = parseFloat(row.cells[1].textContent);
+                if (objVal >= currentBest) {
+                    row.classList.add('highlight');
+                }
+            }
+        }
+        socket.on('trial_update', function (data) {
+            trialCount++;
+            chartData.labels.push(trialCount);
+            chartData.datasets[0].data.push(data.value);
+            optimizationChart.update();
+
+            if (data.value > currentBest) {
+                currentBest = data.value;
+            }
+
+            var featureNames = Object.keys(data.params);
+            if (!tableHeaderInitialized) {
+                initTableHeader(featureNames);
+            }
+
+            var tbody = document.getElementById('trialTable').getElementsByTagName('tbody')[0];
+            var newRow = document.createElement('tr');
+
+            var tdIndex = document.createElement('td');
+            tdIndex.textContent = trialCount;
+            newRow.appendChild(tdIndex);
+
+            var tdObj = document.createElement('td');
+            tdObj.textContent = data.value.toFixed(4);
+            newRow.appendChild(tdObj);
+
+            featureNames.forEach(function (key) {
+                var td = document.createElement('td');
+                td.textContent = data.params[key];
+                newRow.appendChild(td);
+            });
+
+            tbody.appendChild(newRow);
+
+            updateTableHighlight();
+
+            console.log("Trial update: ", data);
+        });
+
+        socket.on('optimization_complete', function (data) {
+            alert("Optimization complete! Best value: " + data.best_value);
+            console.log("Optimization complete: ", data);
+        });
+    </script>
+</body>
+
+</html>

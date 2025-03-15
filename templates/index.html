@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vietnam Website</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            min-height: 100vh;
+            background-color: #f8f9fa;
+        }
+        
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(to bottom, #1a237e, #303f9f);
+            color: white;
+            padding: 20px 0;
+            height: 100vh;
+            position: fixed;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+        
+        .sidebar h2 {
+            padding: 0 15px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            margin-bottom: 20px;
+            text-align: center;
+            color: #ffeb3b;
+        }
+        
+        .sidebar ul {
+            list-style: none;
+        }
+        
+        .sidebar ul li {
+            margin-bottom: 10px;
+        }
+        
+        .sidebar ul li a {
+            color: #fff;
+            text-decoration: none;
+            padding: 12px 15px;
+            display: block;
+            transition: all 0.3s;
+            border-radius: 5px;
+            margin: 0 10px;
+        }
+        
+        .sidebar ul li a:hover {
+            background-color: rgba(255,255,255,0.2);
+            transform: translateX(5px);
+        }
+        
+        .sidebar ul li a i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .main-content {
+            flex: 1;
+            margin-left: 250px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #d50000, #c62828);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        
+        header h1 {
+            font-size: 28px;
+            margin: 10px 0;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+        }
+        
+        .header-icons {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 10px;
+        }
+        
+        .header-icons .heart {
+            color: #fff;
+            font-size: 24px;
+            margin: 0 15px;
+            animation: pulse 1.5s infinite;
+        }
+        
+        .vietnam-flag {
+            width: 40px;
+            height: 30px;
+            background-color: #da251d;
+            position: relative;
+            margin: 0 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .vietnam-flag:after {
+            content: "★";
+            position: absolute;
+            color: #ffff00;
+            font-size: 20px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .content {
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .vietnam-map {
+            max-width: 90%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin: 20px auto;
+            border: 3px solid #c62828;
+            transition: transform 0.3s;
+        }
+        
+        .vietnam-map:hover {
+            transform: scale(1.02);
+        }
+        
+        .page {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+        
+        .active {
+            display: block;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>BIO STREAM</h2>
+        <ul>
+            <li><a href="#contour" ><i class="fas fa-chart-area"></i> Contour Plot</a></li>
+            <li><a href="#upload" ><i class="fas fa-upload"></i> Upload Data</a></li>
+            <li><a href="#optimization" ><i class="fas fa-cogs"></i> Optimization</a></li>
+            <li><a href="#streaming" ><i class="fas fa-stream"></i> Turn on/off</a></li>
+        </ul>
+    </div>
+    
+    <div class="main-content">
+        <header>
+            <h1>Hoang Sa and Truong Sa belong to Vietnam</h1>
+            <div class="header-icons">
+                <div class="vietnam-flag"></div>
+                <i class="fas fa-heart heart"></i>
+                <div class="vietnam-flag"></div>
+            </div>
+        </header>
+        
+        <div class="content">
+            <img src="../static/viet_nam_map.jpg" alt="Map of Vietnam" class="vietnam-map">
+        </div>
+    </div>
+    
+    <script>
+
+    </script>
+</body>
+</html>
