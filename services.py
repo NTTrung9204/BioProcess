@@ -10,6 +10,7 @@ from matplotlib import pyplot as plt
 import numpy as np
 import optuna
 import pandas as pd
+import requests
 from config import KafkaConfig, PathConfig, PostgresConfig
 from constants import DEFAULT_FIXED_BY_MEAN_VALUE, MAX_VALUES, MIN_VALUES
 from repositories import fetch_data, insert_bulk_to_db, insert_data_to_db, query_database
@@ -63,6 +64,32 @@ def produce_data():
             scan += 1
             time.sleep(2)
 
+def stream_data_to_another_VM(data):
+    KAFKA_TOPIC = "operation_data"
+    KAFKA_REST_URL = "http://14.225.198.135/kafka-rest" # VM cua Vietnix
+
+    headers = {
+        'Content-Type': 'application/vnd.kafka.json.v2+json'
+    }
+
+    payload = {
+        "records": [
+            {
+                "value": data
+            }
+        ]
+    }
+
+    response = requests.post(
+        f"{KAFKA_REST_URL}/topics/{KAFKA_TOPIC}",
+        headers=headers,
+        data=json.dumps(payload)
+    )
+
+    if response.status_code == 200:
+        print(f"Produced Operation: {data['timestamp']}")
+    else:
+        print(f"Error producing message: {response.text}")
 
 def consume_kafka():
     print("Kafka consumer starting...", flush=True)
@@ -108,6 +135,8 @@ def consume_kafka():
 
                 data[PostgresConfig.PREDICTION] = predict_xgb(data, xgboost_model)
 
+                stream_data_to_another_VM(data)
+
                 insert_data_to_db(
                     PostgresConfig.TABLE_NAME_OPERATION, data, xgboost_model
                 )
@@ -115,6 +144,8 @@ def consume_kafka():
                 data[PostgresConfig.PREDICTION] = predict_raman(
                     data, plsr_model, scaler_x, scaler_y
                 )
+
+                stream_data_to_another_VM(data)
 
                 insert_data_to_db(
                     PostgresConfig.TABLE_NAME_RAMAN,
