@@ -12,7 +12,7 @@ import optuna
 import pandas as pd
 from config import KafkaConfig, PathConfig, PostgresConfig
 from constants import DEFAULT_FIXED_BY_MEAN_VALUE, MAX_VALUES, MIN_VALUES
-from repositories import fetch_data, insert_bulk_to_db, insert_data_to_db
+from repositories import fetch_data, insert_bulk_to_db, insert_data_to_db, query_database
 from utils import (
     get_producer_status,
     load_plsr_model,
@@ -23,6 +23,8 @@ from utils import (
     predict_xgb,
 )
 
+def executive_query(custom_query):
+    return query_database(custom_query)
 
 def produce_data():
     print(f"✅ {KafkaConfig.KAFKA_BROKER}", flush=True)

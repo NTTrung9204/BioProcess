@@ -14,6 +14,7 @@ class RouterConfig:
         "ROUTE_BAYESIAN_OPTIMAZATION", "bayesian_optimazation"
     )
     ROUTE_CONTOUR_PLOT = os.getenv("ROUTE_CONTOUR_PLOT", "contour_plot")
+    ROUTE_QUERY = os.getenv("ROUTE_QUERY", "query")
 
 class PathConfig:
     UPLOAD_FOLDER = os.getenv("UPLOAD_FOLDER", "uploads")

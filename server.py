@@ -7,7 +7,7 @@ from flask_socketio import SocketIO
 from config import HostConfig, RouterConfig, PathConfig, PostgresConfig
 
 from repositories import create_table
-from services import consume_kafka, process_form_data, process_optimization_data, produce_data, run_optimization, upload_csv_service
+from services import consume_kafka, process_form_data, process_optimization_data, produce_data, run_optimization, upload_csv_service, executive_query
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "secret!"
@@ -16,6 +16,30 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 os.makedirs(PathConfig.UPLOAD_FOLDER, exist_ok=True)
 
 producer_running = True
+
+@app.route(f"/{RouterConfig.ROUTE_QUERY}", methods=["POST"])
+def post_query():
+    try:
+        data = request.json
+        custom_query = data.get('query')
+        
+        result, column_names = executive_query(custom_query)
+        
+        return jsonify({
+            'success': True,
+            'columns': column_names,
+            'data': result
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route(f"/{RouterConfig.ROUTE_QUERY}", methods=["GET"])
+def get_query():
+    return render_template("query.html")
 
 @app.route(f"/{RouterConfig.ROUTE_PRODUCER_STATUS}", methods=["GET"])
 def get_status():
