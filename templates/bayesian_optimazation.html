@@ -28,6 +28,10 @@
             background-color: #ffeb3b !important;
         }
 
+        .feature-selector { margin-bottom: 20px; }
+        .feature-selector label { font-weight: bold; margin-right: 10px; }
+        .feature-selector select { margin-right: 15px; }
+
         @media screen and (max-width: 1300px) {
             #resize{
                 align-items: center;
@@ -51,8 +55,51 @@
         {% endif %}
         <div id="resize" class="row">
             <div style="min-width: 500px;" class="col-md-5 left-panel">
-                <h3>Data Input</h3>
-                <form method="post">
+                <h3>Enter data</h3>
+                <form method="post" id="contourForm">
+                    <div class="feature-selector">
+                        <div class="row mb-2">
+                            <div class="col-md-6">
+                                <label for="feature_1">Feature 1:</label>
+                                <select name="feature_1" id="feature_1" class="form-control" required>
+                                    <option value="">Select feature</option>
+                                    {% for feature in features %}
+                                        <option value="{{ feature }}" {% if selected and selected.f1 == feature %}selected{% endif %}>{{ feature }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="feature_2">Feature 2:</label>
+                                <select name="feature_2" id="feature_2" class="form-control" required>
+                                    <option value="">Select feature</option>
+                                    {% for feature in features %}
+                                        <option value="{{ feature }}" {% if selected and selected.f2 == feature %}selected{% endif %}>{{ feature }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="feature_3">Feature 3:</label>
+                                <select name="feature_3" id="feature_3" class="form-control" required>
+                                    <option value="">Select feature</option>
+                                    {% for feature in features %}
+                                        <option value="{{ feature }}" {% if selected and selected.f3 == feature %}selected{% endif %}>{{ feature }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="feature_4">Feature 4:</label>
+                                <select name="feature_4" id="feature_4" class="form-control" required>
+                                    <option value="">Select feature</option>
+                                    {% for feature in features %}
+                                        <option value="{{ feature }}" {% if selected and selected.f4 == feature %}selected{% endif %}>{{ feature }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <table class="table table-bordered">
                         <thead>
                             <tr>
@@ -64,15 +111,12 @@
                         </thead>
                         <tbody>
                             {% for feature, vals in data.items() %}
-                            <tr>
-                                <td>{{ feature }}</td>
-                                <td><input type="text" name="{{ feature }}_min" value="{{ vals.min }}"
-                                        class="form-control"></td>
-                                <td><input type="text" name="{{ feature }}_max" value="{{ vals.max }}"
-                                        class="form-control"></td>
-                                <td><input type="text" name="{{ feature }}_fix" value="{{ vals.fix }}"
-                                        class="form-control"></td>
-                            </tr>
+                                <tr id="row_{{ feature }}">
+                                    <td>{{ feature }}</td>
+                                    <td><input type="text" name="{{ feature }}_min" value="{{ vals.min }}" class="form-control"></td>
+                                    <td><input type="text" name="{{ feature }}_max" value="{{ vals.max }}" class="form-control"></td>
+                                    <td><input type="text" name="{{ feature }}_fix" value="{{ vals.fix }}" class="form-control" id="fix_{{ feature }}"></td>
+                                </tr>
                             {% endfor %}
                         </tbody>
                     </table>
@@ -292,6 +336,65 @@
         socket.on('optimization_complete', function (data) {
             alert("Optimization complete! Best value: " + data.best_value);
             console.log("Optimization complete: ", data);
+        });
+
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const selectors = ['feature_1', 'feature_2', 'feature_3', 'feature_4'];
+            const defaultFixValues = {
+                {% for feature, default_value in default_fixed_values.items() %}
+                '{{ feature }}': '{{ default_value }}',
+                {% endfor %}
+            };
+            
+            function updateFixFields() {
+                {% for feature in features %}
+                document.getElementById('fix_{{ feature }}').value = defaultFixValues['{{ feature }}'];
+                {% endfor %}
+                
+                selectors.forEach(function(selector) {
+                    const selectedFeature = document.getElementById(selector).value;
+                    if (selectedFeature) {
+                        document.getElementById('fix_' + selectedFeature).value = '';
+                    }
+                });
+            }
+            
+            selectors.forEach(function(selector) {
+                document.getElementById(selector).addEventListener('change', function() {
+                    updateFixFields();
+                    validateSelections();
+                });
+            });
+            
+            function validateSelections() {
+                const selectedFeatures = {};
+                let hasError = false;
+                
+                selectors.forEach(function(selector) {
+                    document.getElementById(selector).style.backgroundColor = '';
+                });
+                
+                selectors.forEach(function(selector) {
+                    const select = document.getElementById(selector);
+                    const value = select.value;
+                    
+                    if (value && selectedFeatures[value]) {
+                        select.style.backgroundColor = 'rgba(255, 0, 0, 0.2)';
+                        document.getElementById(selectedFeatures[value]).style.backgroundColor = 'rgba(255, 0, 0, 0.2)';
+                        hasError = true;
+                    }
+                    
+                    if (value) {
+                        selectedFeatures[value] = selector;
+                    }
+                });
+                
+                document.querySelector('button[type="submit"]').disabled = hasError;
+            }
+            
+            updateFixFields();
+            validateSelections();
         });
     </script>
 </body>

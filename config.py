@@ -1,8 +1,12 @@
+import json
 import os
+
 
 class HostConfig:
     HOST_IP = os.getenv("HOST_IP", "localhost")
     HOST_PORT = os.getenv("HOST_PORT", "5000")
+    HOST_TARGET = os.getenv("HOST_TARGET", None)
+
 
 class RouterConfig:
     BASE_URL = f"http://{HostConfig.HOST_IP}:{HostConfig.HOST_PORT}"
@@ -15,14 +19,21 @@ class RouterConfig:
     )
     ROUTE_CONTOUR_PLOT = os.getenv("ROUTE_CONTOUR_PLOT", "contour_plot")
     ROUTE_QUERY = os.getenv("ROUTE_QUERY", "query")
+    ROUTE_RECEIVE_CSV = os.getenv("ROUTE_RECEIVE_CSV", "receive_csv")
+
 
 class PathConfig:
     UPLOAD_FOLDER = os.getenv("UPLOAD_FOLDER", "uploads")
     MODEL_FOLDER = os.getenv("MODEL_FOLDER", "model")
-    XGBOOST_MODEL = os.getenv("XGBOOST_MODEL", "xgboost_model.json")
-    PLS_MODEL = os.getenv("PLS_MODEL", "pls_model.joblib")
-    SCALER_X = os.getenv("SCALER_X", "scaler_x.joblib")
-    SCALER_Y = os.getenv("SCALER_Y", "scaler_y.joblib")
+
+    MODEL_1 = os.getenv("MODEL_1", "svm_model.pkl")
+    MODEL_1_SCALER_X = os.getenv("MODEL_1_SCALER_X", "svm_model.pkl")
+    MODEL_1_SCALER_Y = os.getenv("MODEL_1_SCALER_Y", "svm_model.pkl")
+
+    MODEL_2 = os.getenv("MODEL_2", "svm_model.pkl")
+    MODEL_2_SCALER_X = os.getenv("MODEL_2_SCALER_X", "svm_model.pkl")
+    MODEL_2_SCALER_Y = os.getenv("MODEL_2_SCALER_Y", "svm_model.pkl")
+
 
 class PostgresConfig:
     POSTGRES_CONFIG = {
@@ -41,111 +52,125 @@ class PostgresConfig:
         "port": os.getenv("POSTGRES_PORT", "5432"),
     }
 
-    TABLE_NAME_OPERATION = os.getenv("TABLE_NAME_OPERATION", "operation")
-    TABLE_NAME_RAMAN = os.getenv("TABLE_NAME_RAMAN", "raman")
-    TABLE_NAME_TEMP = os.getenv("TABLE_NAME_TEMP", "temp_operation")
+    # Table names
+    TABLE_NAME_PILOT = os.getenv("TABLE_NAME_PILOT", "pilot")
+    TABLE_NAME_FTIR = os.getenv("TABLE_NAME_FTIR", "ftir")
+    TABLE_NAME_TEMP = os.getenv("TABLE_NAME_TEMP", "temp_pilot")
 
-    PEN_COL = os.getenv("PEN_COL", "Penicillin concentration(P:g/L)")
-    VV_COL = os.getenv("VV_COL", "Vessel Volume(V:L)")
-    WTFD_COL = os.getenv("WTFD_COL", "Water for injection/dilution(Fw:L/h)")
-    ARATE_COL = os.getenv("ARATE_COL", "Aeration rate(Fg:L/h)")
-    SFR_COL = os.getenv("SFR_COL", "Sugar feed rate(Fs:L/h)")
-    DO_COL = os.getenv("DO_COL", "Dissolved oxygen concentration(DO2:mg/L)")
-    TEM_COL = os.getenv("TEM_COL", "Temperature(T:K)")
-    TIME_COL = os.getenv("TIME_COL", "Time (h)")
-    OUR_COL = os.getenv("OUR_COL", "Oxygen Uptake Rate(OUR:(g min^{-1}))")
-
-    FEATURES = [
-        TEM_COL,
-        DO_COL,
-        SFR_COL,
-        ARATE_COL,
-        WTFD_COL,
-        VV_COL,
-        OUR_COL,
-        TIME_COL,
-    ]
-
-    TEMPERATURE = os.getenv("TEMPERATURE", "temperature")
-    DISSOLVED_OXYGEN = os.getenv("DISSOLVED_OXYGEN", "dissolved_oxygen")
-    SUGAR_FEED_RATE = os.getenv("SUGAR_FEED_RATE", "sugar_feed_rate")
-    AERATION_RATE = os.getenv("AERATION_RATE", "aeration_rate")
-    WATER_INJECTION = os.getenv("WATER_INJECTION", "water_injection")
-    VESSEL_VOLUME = os.getenv("VESSEL_VOLUME", "vessel_volume")
-    OXYGEN_UPTAKE = os.getenv("OXYGEN_UPTAKE", "oxygen_uptake")
-    TIME_H = os.getenv("TIME_H", "time_h")
-
+    # Common database fields that exist in both tables
     TIMESTAMP = os.getenv("TIMESTAMP", "timestamp")
     SCAN = os.getenv("SCAN", "scan")
-    PENICILLIN = os.getenv("PENICILLIN", "penicillin")
-    PREDICTION = os.getenv("PREDICTION", "prediction")
     CUST = os.getenv("CUST", "cust")
-    PROJECT_ID = os.getenv("PROJECT_ID", "project_id")
-    BATCH_ID = os.getenv("BATCH_ID", "batchid")
+    SAMPLE_ID = os.getenv("SAMPLE_ID", "sample_id")
+    TEST_CAMPAING_ID = os.getenv("TEST_CAMPAING_ID", "test_campaing_id")
+    RUN_ID = os.getenv("RUN_ID", "run_id")
 
-    COLUMN_MAPPING = {
-        PEN_COL: PENICILLIN,
-        VV_COL: VESSEL_VOLUME,
-        WTFD_COL: WATER_INJECTION,
-        ARATE_COL: AERATION_RATE,
-        SFR_COL: SUGAR_FEED_RATE,
-        DO_COL: DISSOLVED_OXYGEN,
-        TEM_COL: TEMPERATURE,
-        TIME_COL: TIME_H,
-        OUR_COL: OXYGEN_UPTAKE,
-    }
+    PREDICTED_OIL = os.getenv("PREDICTED_OIL", "predicted_oil_yield")
+    PREDICTED_OIL_CONCENTRATION = os.getenv(
+        "PREDICTED_OIL_CONCENTRATION", "predicted_oil_concentration"
+    )
 
-    OPERATION_COLUMNS = [
-        TEMPERATURE,
-        DISSOLVED_OXYGEN,
-        SUGAR_FEED_RATE,
-        AERATION_RATE,
-        WATER_INJECTION,
-        VESSEL_VOLUME,
-        OXYGEN_UPTAKE,
-        TIME_H,
-    ]
+    # FTIR specific columns
+    FTIR_MAX_COLUMN = int(os.getenv("FTIR_MAX_COLUMN", "1200"))
+    FTIR_MIN_COLUMN = int(os.getenv("FTIR_MIN_COLUMN", "199"))
 
-    RAMAN_COLUMNS = [
+    print(FTIR_MAX_COLUMN, FTIR_MIN_COLUMN, flush=True)
+
+    FTIR_COLUMNS = [
         str(i)
         for i in range(
-            int(os.getenv("RAMAN_MAX_COLUMN", "1350")),
-            int(os.getenv("RAMAN_MIN_COLUMN", "1099")),
+            FTIR_MAX_COLUMN,
+            FTIR_MIN_COLUMN - 1,
             -1,
         )
     ]
 
-    DATABASE_OPERATION_TABLE_COLUMNS = [
-        f"{TIMESTAMP} TIMESTAMP UNIQUE DEFAULT NULL",
-        f"{SCAN} INTEGER",
-        f"{PENICILLIN} FLOAT DEFAULT NULL",
-        f"{PREDICTION} FLOAT DEFAULT NULL",
-        f"{TIME_H} FLOAT DEFAULT NULL",
-        f"{DISSOLVED_OXYGEN} FLOAT DEFAULT NULL",
-        f"{SUGAR_FEED_RATE} FLOAT DEFAULT NULL",
-        f"{AERATION_RATE} FLOAT DEFAULT NULL",
-        f"{WATER_INJECTION} FLOAT DEFAULT NULL",
-        f"{VESSEL_VOLUME} FLOAT DEFAULT NULL",
-        f"{OXYGEN_UPTAKE} FLOAT DEFAULT NULL",
-        f"{TEMPERATURE} FLOAT DEFAULT NULL",
+    SENSOR_DEFINITIONS_JSON = os.getenv("SENSOR_COLUMNS", "{}")
+
+    try:
+        _sensor_data = json.loads(SENSOR_DEFINITIONS_JSON)
+
+        # Extract SENSOR_MAPPINGS
+        SENSOR_MAPPINGS = {}
+
+        for display_name, value_string in _sensor_data.items():
+            parts = value_string.split(":")
+            column_name = parts[0]
+
+            # Add to SENSOR_MAPPINGS
+            SENSOR_MAPPINGS[display_name] = column_name
+
+    except json.JSONDecodeError:
+        # Use default mappings if JSON parsing fails
+        print("Error parsing JSON from environment variable SENSOR_COLUMNS", flush=True)
+        SENSOR_MAPPINGS = {}
+
+    # Extract feature names and column names
+    FEATURES = list(SENSOR_MAPPINGS.keys())
+    PILOT_COLUMNS = list(SENSOR_MAPPINGS.values())
+
+    # Dynamically generate column definitions for database tables
+    # Common columns for both tables
+    _COMMON_COLUMNS = [
+        f"{TIMESTAMP} TIMESTAMP UNIQUE",
+        f"{SCAN} INTEGER DEFAULT 0",
         f"{CUST} TEXT DEFAULT NULL",
-        f"{PROJECT_ID} TEXT DEFAULT NULL",
-        f"{BATCH_ID} TEXT DEFAULT NULL",
+        f"{SAMPLE_ID} TEXT DEFAULT NULL",
+        f"{TEST_CAMPAING_ID} TEXT DEFAULT NULL",
+        f"{RUN_ID} TEXT DEFAULT NULL",
     ]
 
-    DATABASE_RAMAN_TABLE_COLUMNS = [
-        f"{TIMESTAMP} TIMESTAMP UNIQUE",
-        f"{SCAN} INTEGER",
-        f"{PREDICTION} FLOAT",
-    ] + [f'"{col}" FLOAT' for col in RAMAN_COLUMNS]
+    # Generate pilot table definition dynamically from SENSOR_MAPPINGS
+    DATABASE_PILOT_TABLE_COLUMNS = _COMMON_COLUMNS.copy()
+    DATABASE_PILOT_TABLE_COLUMNS.extend(
+        [f'"{PREDICTED_OIL}" FLOAT DEFAULT 0']
+        + [f'"{column_name}" FLOAT DEFAULT NULL' for column_name in PILOT_COLUMNS]
+    )
+
+    # FTIR table definition
+    DATABASE_FTIR_TABLE_COLUMNS = _COMMON_COLUMNS.copy()
+    DATABASE_FTIR_TABLE_COLUMNS.extend(
+        [f'"{PREDICTED_OIL_CONCENTRATION}" FLOAT DEFAULT 0'] + [f'"{col}" FLOAT DEFAULT NULL' for col in FTIR_COLUMNS]
+    )
+
 
 class KafkaConfig:
     KAFKA_BROKER = os.getenv("KAFKA_BROKER", "kafka:9092")
 
-    KAFKA_TOPIC_OPERATION = os.getenv("KAFKA_TOPIC_OPERATION", "operation_data")
-    KAFKA_TOPIC_RAMAN = os.getenv("KAFKA_TOPIC_RAMAN", "raman_data")
+    KAFKA_TOPIC_PILOT = os.getenv("KAFKA_TOPIC_PILOT", "data_1")
+    KAFKA_TOPIC_FTIR = os.getenv("KAFKA_TOPIC_FTIR", "data_2")
 
     TOPICS = [
-        KAFKA_TOPIC_OPERATION,
-        KAFKA_TOPIC_RAMAN,
+        KAFKA_TOPIC_PILOT,
+        KAFKA_TOPIC_FTIR,
     ]
+
+
+class UserConfig:
+    ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "trungdeptrai")
+    ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "goodmorning")
+
+    USERNAME_2 = os.getenv("USERNAME_2", "abcyxz")
+    PASSWORD_2 = os.getenv("PASSWORD_2", "abcyxz")
+
+    USERNAME_3 = os.getenv("USERNAME_3", "abcyxz")
+    PASSWORD_3 = os.getenv("PASSWORD_3", "abcyxz")
+
+    UserDBInstance = {
+        ADMIN_USERNAME: ADMIN_PASSWORD,
+        USERNAME_2: PASSWORD_2,
+        USERNAME_3: PASSWORD_3,
+    }
+
+
+class KeyConfig:
+    API_KEY = os.getenv("API_KEY", "")
+    VERIFIED_API_KEY = os.getenv("VERIFIED_API_KEY", "")
+
+
+class RunningConfig:
+    NUM_ROWS_ConPLOT = int(os.getenv("NUM_ROWS_ConPLOT", "4"))
+    NUM_COLs_ConPLOT = int(os.getenv("NUM_COLs_ConPLOT", "4"))
+
+    NUM_TRIALS_BO = int(os.getenv("NUM_TRIALS_BO", "1000"))
+    LEVEL_BO_DOE = int(os.getenv("LEVEL_BO_DOE", "4"))

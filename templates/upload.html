@@ -5,152 +5,416 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Upload CSV</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
+        :root {
+            --primary-color: #4a6fa5;
+            --primary-hover: #3a5a8c;
+            --secondary-color: #e9ecef;
+            --text-color: #333;
+            --error-color: #dc3545;
+            --success-color: #28a745;
+            --border-radius: 6px;
+            --box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            background-color: #f4f4f4;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: var(--text-color);
             margin: 0;
             padding: 0;
+            line-height: 1.6;
         }
 
         .container {
-            width: 40%;
-            margin: auto;
-            padding: 20px;
+            width: 90%;
+            max-width: 700px;
+            margin: 40px auto;
+            padding: 30px;
             background: white;
-            border-radius: 10px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-            margin-top: 50px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
         }
 
-        label,
-        input,
-        button {
+        h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
             display: block;
-            margin: 10px auto;
+            margin-bottom: 8px;
+            font-weight: 600;
         }
 
-        input {
-            padding: 8px;
-            width: 80%;
-            border: 1px solid #ccc;
-            border-radius: 5px;
+        input[type="text"],
+        input[type="file"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            transition: border-color 0.3s;
+            box-sizing: border-box;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.2);
         }
 
         .error {
-            color: red;
+            color: var(--error-color);
             display: none;
             font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
         }
 
         #submit-btn {
+            width: 150px;
+            margin: 20px auto;
+            display: block;
             position: relative;
-            padding: 10px 20px;
-            background: #28a745;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
             transition: transform 0.3s ease;
         }
 
-        #submit-btn:hover {
-            background: #218838;
+        .file-upload {
+            position: relative;
+            overflow: hidden;
+            margin-top: 10px;
+            border: 2px dashed #ddd;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .file-upload:hover {
+            border-color: var(--primary-color);
+        }
+
+        .file-upload input[type="file"] {
+            position: absolute;
+            font-size: 100px;
+            opacity: 0;
+            right: 0;
+            top: 0;
+            cursor: pointer;
+            height: 100%;
+        }
+
+        .file-upload label {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .file-upload i {
+            font-size: 42px;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+
+        .file-name {
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        .preview-container {
+            margin-top: 30px;
+            overflow-x: auto;
         }
 
         #preview {
-            margin-top: 20px;
-            display: none;
-            border-collapse: collapse;
             width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            display: none;
         }
 
         #preview th,
         #preview td {
-            border: 1px solid black;
-            padding: 5px;
+            border: 1px solid #ddd;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        #preview th {
+            background-color: var(--secondary-color);
+            font-weight: 600;
+        }
+
+        #preview tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .processing {
+            display: none;
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .alert {
+            padding: 12px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert-success {
+            background-color: rgba(40, 167, 69, 0.1);
+            border: 1px solid var(--success-color);
+            color: var(--success-color);
+        }
+
+        .alert-error {
+            background-color: rgba(220, 53, 69, 0.1);
+            border: 1px solid var(--error-color);
+            color: var(--error-color);
         }
     </style>
 </head>
 
 <body>
     <div class="container">
-        <h2>Upload CSV</h2>
-        <label>Cust:</label>
-        <input type="text" id="cust">
-        <span class="error" id="cust-error">Please enter Cust</span>
+        <h2>Upload CSV File</h2>
 
-        <label>Project ID:</label>
-        <input type="text" id="project_id">
-        <span class="error" id="project-error">Please enter Project ID</span>
+        <div class="alert alert-success" id="success-message">
+            Upload successfully! Your data has been processed.
+        </div>
 
-        <label>Batch ID:</label>
-        <input type="text" id="batch_id">
-        <span class="error" id="batch-error">Please enter Batch ID</span>
+        <div class="alert alert-error" id="error-message">
+            An error occurred. Please try again.
+        </div>
 
-        <label>Upload CSV:</label>
-        <input type="file" id="file" accept=".csv">
-        <span class="error" id="file-error">Please upload file</span>
+        <div id="dynamic-form-fields">
+            {% for column in columns %}
+            {% set field_name = column.name %}
+            {% set field_type = column.type %}
+            {% set field_default = column.default %}
 
-        <table id="preview"></table>
-        <button id="submit-btn">Submit</button>
+            <div class="form-group">
+                <label for="{{ field_name }}">{{ field_name|capitalize }}:</label>
+                <input type="text" id="{{ field_name }}" name="{{ field_name }}"
+                    placeholder="Enter {{ field_name|replace('_', ' ') }}" {% if field_default !=None
+                    %}value="{{ field_default }}" {% endif %}>
+                <span class="error" id="{{ field_name }}-error">Please enter a valid {{ field_name|replace('_', ' ')
+                    }}</span>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="form-group">
+            <div class="file-upload">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <label>Drag and drop or click to select CSV file</label>
+                <input type="file" id="file" accept=".csv">
+                <div class="file-name" id="file-name">No file selected</div>
+            </div>
+            <span class="error" id="file-error">Please upload a CSV file</span>
+        </div>
+
+        <div class="preview-container">
+            <table id="preview"></table>
+        </div>
+
+        <button id="submit-btn" class="btn btn-primary">Submit</button>
+
+        <div class="processing" id="processing">
+            <i class="fas fa-spinner fa-spin"></i> Processing your upload...
+        </div>
     </div>
 
     <script>
-        function validateForm() {
-            let isValid = true;
-            $(".error").hide();
-
-            if ($("#cust").val().trim() === "") {
-                $("#cust-error").show();
-                isValid = false;
-            }
-            if ($("#project_id").val().trim() === "") {
-                $("#project-error").show();
-                isValid = false;
-            }
-            if ($("#batch_id").val().trim() === "") {
-                $("#batch-error").show();
-                isValid = false;
-            }
-            if ($("#file")[0].files.length === 0) {
-                $("#file-error").show();
-                isValid = false;
-            }
-
-            if (!isValid) {
-                let x = Math.random() * (window.innerWidth - 100);
-                let y = Math.random() * (window.innerHeight - 50);
-                $("#submit-btn").css({ left: x + "px", top: y + "px", position: "absolute" });
-            }
-            return isValid;
-        }
-
-        $("#submit-btn").click(function () {
-            if (!validateForm()) return;
-            if (!confirm("Are you sure to submit data?")) return;
-
-            let formData = new FormData();
-            formData.append("cust", $("#cust").val().trim());
-            formData.append("project_id", $("#project_id").val().trim());
-            formData.append("batch_id", $("#batch_id").val().trim());
-            formData.append("file", $("#file")[0].files[0]);
-
-            $.ajax({
-                url: "/upload",
-                type: "POST",
-                data: formData,
-                contentType: false,
-                processData: false,
-                success: function (response) {
-                    alert("Upload successfully!");
-                },
-                error: function (xhr, status, error) {
-                    alert("Failed to upload: " + error);
+        $(document).ready(function () {
+            $("#file").change(function () {
+                const fileName = $(this).val().split('\\').pop();
+                if (fileName) {
+                    $("#file-name").text(fileName);
+                    previewCSV(this.files[0]);
+                } else {
+                    $("#file-name").text("No file selected");
+                    $("#preview").hide();
                 }
             });
+
+            function previewCSV(file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const contents = e.target.result;
+                    const lines = contents.split('\n');
+
+                    if (lines.length > 0) {
+                        const headerRow = lines[0].split(',');
+                        let previewHTML = '<tr>';
+
+                        headerRow.forEach(header => {
+                            previewHTML += `<th>${header.trim()}</th>`;
+                        });
+                        previewHTML += '</tr>';
+
+                        const rowLimit = Math.min(lines.length, 6);
+                        for (let i = 1; i < rowLimit; i++) {
+                            if (lines[i].trim() === '') continue;
+
+                            const cells = lines[i].split(',');
+                            previewHTML += '<tr>';
+                            cells.forEach(cell => {
+                                previewHTML += `<td>${cell.trim()}</td>`;
+                            });
+                            previewHTML += '</tr>';
+                        }
+
+                        $("#preview").html(previewHTML).show();
+                    }
+                };
+                reader.readAsText(file);
+            }
+
+            function validateForm() {
+                let isValid = true;
+                $(".error").hide();
+
+                const requiredFields = [];
+
+                $('#dynamic-form-fields input[type="text"]').each(function () {
+                    const fieldId = $(this).attr('id');
+                    const fieldValue = $(this).val().trim();
+
+                    if (fieldId === 'scan' && (fieldValue === '' || isNaN(fieldValue))) {
+                        $(`#${fieldId}-error`).show();
+                        isValid = false;
+                    }
+                    else if (fieldValue === '') {
+                        $(`#${fieldId}-error`).show();
+                        isValid = false;
+                    }
+                });
+
+                if ($("#file")[0].files.length === 0) {
+                    $("#file-error").show();
+                    isValid = false;
+                }
+
+                return isValid;
+            }
+
+            $("#submit-btn").click(function (e) {
+                e.preventDefault();
+                $(".alert").hide();
+
+                if (!validateForm()) {
+                    let buttonWidth = $(this).outerWidth();
+                    let buttonHeight = $(this).outerHeight();
+                    let containerWidth = $(".container").width();
+                    let containerHeight = $(".container").height();
+
+                    let maxX = containerWidth - buttonWidth - 40;
+                    let maxY = containerHeight - buttonHeight - 40;
+
+                    let x = Math.random() * 1000 - 500;
+                    let y = Math.random() * 1000 - 500;
+
+                    if (x > maxX) x = maxX;
+
+                    if (y > maxY) y = maxY;
+
+                    $(this).css({
+                        "position": "relative",
+                        "left": x + "px",
+                        "top": y + "px",
+                        "transition": "all 0.1s ease"
+                    });
+
+                    return;
+                }
+
+                $(this).css({
+                    "position": "relative",
+                    "left": "auto",
+                    "top": "auto",
+                    "margin": "20px auto",
+                    "transition": "all 0.5s ease"
+                });
+
+                if (!confirm("Are you sure you want to submit this data?")) return;
+
+                $("#processing").show();
+                $(this).prop("disabled", true).text("Processing...");
+
+                let formData = new FormData();
+
+                $('#dynamic-form-fields input[type="text"]').each(function () {
+                    formData.append($(this).attr('id'), $(this).val().trim());
+                });
+
+                formData.append("file", $("#file")[0].files[0]);
+
+                $.ajax({
+                    url: "/upload",
+                    type: "POST",
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function (response) {
+                        $("#success-message").show();
+                        resetForm();
+                    },
+                    error: function (xhr, status, error) {
+                        let errorMsg = "Failed to upload: " + error;
+                        if (xhr.responseJSON && xhr.responseJSON.error) {
+                            errorMsg = xhr.responseJSON.error;
+                        }
+                        $("#error-message").text(errorMsg).show();
+                    },
+                    complete: function () {
+                        $("#processing").hide();
+                        $("#submit-btn").prop("disabled", false).text("Submit");
+                    }
+                });
+            });
+
+            function resetForm() {
+                $('#dynamic-form-fields input[type="text"]').each(function () {
+                    const defaultVal = $(this).attr('data-default') || '';
+                    $(this).val(defaultVal);
+                });
+
+                $("#file").val("");
+                $("#file-name").text("No file selected");
+                $("#preview").hide();
+            }
         });
     </script>
 </body>
