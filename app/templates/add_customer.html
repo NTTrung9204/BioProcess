@@ -7,7 +7,7 @@
 {% block content %}
 <div class="row mb-4">
     <div class="col text-end">
-        <a href="{{ url_for('customers_page') }}" class="btn btn-secondary">
+        <a href="{{ url_for('customer.customers_page') }}" class="btn btn-secondary">
             <i class="fas fa-arrow-left"></i> Back to Customers
         </a>
     </div>
@@ -17,7 +17,7 @@
     <div class="col-md-10 mx-auto">
         <div class="card shadow-sm">
             <div class="card-body">
-                <form action="{{ url_for('add_customer_page') }}" method="post" class="needs-validation" novalidate>
+                <form action="{{ url_for('customer.add_customer_page') }}" method="post" class="needs-validation" novalidate>
                     <div class="mb-3">
                         <label for="cust_name" class="form-label">Customer Name <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="cust_name" name="cust_name" 
@@ -57,7 +57,7 @@
                     </div>
                     
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <a href="{{ url_for('customers_page') }}" class="btn btn-secondary me-md-2">Cancel</a>
+                        <a href="{{ url_for('customer.customers_page') }}" class="btn btn-secondary me-md-2">Cancel</a>
                         <button type="submit" class="btn btn-primary">Add Customer</button>
                     </div>
                 </form>

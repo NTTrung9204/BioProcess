@@ -11,7 +11,7 @@
                     <h4 class="mb-0">Add New Project</h4>
                 </div>
                 <div class="card-body">
-                    <form method="POST" action="{{ url_for('add_project') }}">
+                    <form method="POST" action="{{ url_for('project.add_project') }}">
                         <div class="mb-3">
                             <label for="project_name" class="form-label">Project Name</label>
                             <input type="text" class="form-control" id="project_name" name="project_name" required>
@@ -39,7 +39,7 @@
                         </div>
                         
                         <div class="d-flex justify-content-between">
-                            <a href="{{ url_for('projects') }}" class="btn btn-secondary">Cancel</a>
+                            <a href="{{ url_for('project.projects') }}" class="btn btn-secondary">Cancel</a>
                             <button type="submit" class="btn btn-primary">Save Project</button>
                         </div>
                     </form>
