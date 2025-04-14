@@ -1,0 +1,200 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Project{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Edit Project</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('edit_project', project_id=project.project_id) }}">
+                        <div class="mb-3">
+                            <label for="project_name" class="form-label">Project Name</label>
+                            <input type="text" class="form-control" id="project_name" name="project_name" value="{{ project.project_name }}" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="cust_name" class="form-label">Customer</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="cust_name" name="cust_name" value="{{ project.cust_name }}" autocomplete="off" required>
+                                <button class="btn btn-outline-secondary" type="button" id="search-customer">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                            <div id="customerSuggestions" class="list-group mt-2" style="display: none; position: absolute; z-index: 1000; width: 94%;"></div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="budget" class="form-label">Budget ($)</label>
+                            <input type="number" step="0.01" class="form-control" id="budget" name="budget" value="{{ project.budget }}" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="project_manager" class="form-label">Project Manager</label>
+                            <input type="text" class="form-control" id="project_manager" name="project_manager" value="{{ project.project_manager }}" required>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('projects') }}" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Update Project</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const custNameInput = document.getElementById('cust_name');
+    const suggestionsList = document.getElementById('customerSuggestions');
+    
+    // Variable to track typing timeout
+    let typingTimer;
+    const doneTypingInterval = 300; // time in ms
+    
+    // Add input event listener for real-time search
+    custNameInput.addEventListener('input', function() {
+        const searchTerm = this.value.trim();
+        
+        // Clear any previous timer
+        clearTimeout(typingTimer);
+        
+        // Empty search term - hide suggestions
+        if (searchTerm.length < 2) {
+            suggestionsList.style.display = 'none';
+            return;
+        }
+        
+        // Set a timer for when user stops typing
+        typingTimer = setTimeout(() => {
+            searchCustomers(searchTerm);
+        }, doneTypingInterval);
+    });
+    
+    // Search button click event
+    document.getElementById('search-customer').addEventListener('click', function() {
+        const searchTerm = custNameInput.value.trim();
+        if (searchTerm.length < 2) return;
+        searchCustomers(searchTerm);
+    });
+    
+    // Function to perform the customer search
+    function searchCustomers(searchTerm) {
+        fetch(`/api/search-customers?term=${encodeURIComponent(searchTerm)}`)
+            .then(response => response.json())
+            .then(data => {
+                suggestionsList.innerHTML = '';
+                
+                if (data && data.length > 0) {
+                    data.forEach(customer => {
+                        const item = document.createElement('a');
+                        item.classList.add('list-group-item', 'list-group-item-action');
+                        item.textContent = customer.cust_name;
+                        if (customer.contact_infor) {
+                            const small = document.createElement('small');
+                            small.classList.add('d-block', 'text-muted');
+                            small.textContent = customer.contact_infor;
+                            item.appendChild(small);
+                        }
+                        
+                        item.addEventListener('click', function() {
+                            custNameInput.value = customer.cust_name;
+                            suggestionsList.style.display = 'none';
+                        });
+                        
+                        suggestionsList.appendChild(item);
+                    });
+                    
+                    suggestionsList.style.display = 'block';
+                } else {
+                    // Optional: show "no results" message
+                    const noResults = document.createElement('div');
+                    noResults.classList.add('list-group-item', 'text-muted');
+                    noResults.textContent = 'No customers found';
+                    suggestionsList.appendChild(noResults);
+                    suggestionsList.style.display = 'block';
+                }
+            })
+            .catch(error => {
+                console.error('Error searching customers:', error);
+                suggestionsList.style.display = 'none';
+            });
+    }
+    
+    // Hide suggestions when clicking outside
+    document.addEventListener('click', function(event) {
+        if (!event.target.closest('#cust_name') && 
+            !event.target.closest('#search-customer') &&
+            !event.target.closest('#customerSuggestions')) {
+            suggestionsList.style.display = 'none';
+        }
+    });
+    
+    // Focus event to show suggestions if there's existing text
+    custNameInput.addEventListener('focus', function() {
+        const searchTerm = this.value.trim();
+        if (searchTerm.length >= 2) {
+            searchCustomers(searchTerm);
+        }
+    });
+    
+    // Add keyboard navigation for suggestions
+    custNameInput.addEventListener('keydown', function(e) {
+        const items = suggestionsList.querySelectorAll('.list-group-item-action');
+        if (items.length === 0) return;
+        
+        // Find currently focused item
+        const focusedItem = suggestionsList.querySelector('.active');
+        const focusedIndex = Array.from(items).indexOf(focusedItem);
+        
+        switch (e.key) {
+            case 'ArrowDown':
+                e.preventDefault();
+                if (focusedItem) {
+                    // Move to next item or first if at end
+                    const nextIndex = (focusedIndex + 1) % items.length;
+                    focusedItem.classList.remove('active');
+                    items[nextIndex].classList.add('active');
+                } else {
+                    // Focus first item if none focused
+                    items[0].classList.add('active');
+                }
+                break;
+                
+            case 'ArrowUp':
+                e.preventDefault();
+                if (focusedItem) {
+                    // Move to previous item or last if at start
+                    const prevIndex = (focusedIndex - 1 + items.length) % items.length;
+                    focusedItem.classList.remove('active');
+                    items[prevIndex].classList.add('active');
+                } else {
+                    // Focus last item if none focused
+                    items[items.length - 1].classList.add('active');
+                }
+                break;
+                
+            case 'Enter':
+                if (focusedItem) {
+                    e.preventDefault();
+                    custNameInput.value = focusedItem.textContent.split('\n')[0]; // Get first line of text only
+                    suggestionsList.style.display = 'none';
+                }
+                break;
+                
+            case 'Escape':
+                suggestionsList.style.display = 'none';
+                break;
+        }
+    });
+});
+</script>
+{% endblock %}
+{% endblock %} 

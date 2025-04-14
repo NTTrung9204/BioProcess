@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+
+{% block title %}Contour Plot Web App{% endblock %}
+
+{% block page_title %}Contour Plot Tool{% endblock %}
+
+{% block head_extra %}
+<style>
+    .left-panel { border-right: 1px solid #ccc; }
+    .right-panel { padding-left: 20px; }
+    .feature-selector { margin-bottom: 20px; }
+    .feature-selector label { font-weight: bold; margin-right: 10px; }
+    .feature-selector select { margin-right: 15px; }
+
+    @media screen and (max-width: 1300px) {
+        #resize{
+            align-items: center;
+            justify-content: center;
+            gap: 50px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+{% if error %}
+    <div class="alert alert-danger">{{ error }}</div>
+{% endif %}
+<div id="resize" class="row" >
+    <div style="min-width: 500px;" class="col-md-5 left-panel">
+        <h3>Enter data</h3>
+        <form method="post" id="contourForm">
+            <div class="feature-selector">
+                <div class="row mb-2">
+                    <div class="col-md-6">
+                        <label for="x_feature">X (row variable):</label>
+                        <select name="x_feature" id="x_feature" class="form-control" required>
+                            <option value="">Select feature</option>
+                            {% for feature in features %}
+                                <option value="{{ feature }}" {% if selected and selected.x == feature %}selected{% endif %}>{{ feature }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="y_feature">Y (col variable):</label>
+                        <select name="y_feature" id="y_feature" class="form-control" required>
+                            <option value="">Select feature</option>
+                            {% for feature in features %}
+                                <option value="{{ feature }}" {% if selected and selected.y == feature %}selected{% endif %}>{{ feature }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <label for="row_feature">Row feature:</label>
+                        <select name="row_feature" id="row_feature" class="form-control" required>
+                            <option value="">Select feature</option>
+                            {% for feature in features %}
+                                <option value="{{ feature }}" {% if selected and selected.row == feature %}selected{% endif %}>{{ feature }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="col_feature">Col feature:</label>
+                        <select name="col_feature" id="col_feature" class="form-control" required>
+                            <option value="">Select feature</option>
+                            {% for feature in features %}
+                                <option value="{{ feature }}" {% if selected and selected.col == feature %}selected{% endif %}>{{ feature }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>Min</th>
+                        <th>Max</th>
+                        <th>Fix</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for feature, vals in data.items() %}
+                        <tr id="row_{{ feature }}">
+                            <td>{{ feature }}</td>
+                            <td><input type="text" name="{{ feature }}_min" value="{{ vals.min }}" class="form-control"></td>
+                            <td><input type="text" name="{{ feature }}_max" value="{{ vals.max }}" class="form-control"></td>
+                            <td><input type="text" name="{{ feature }}_fix" value="{{ vals.fix }}" class="form-control" id="fix_{{ feature }}"></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+    </div>
+    <div class="col-md-7 right-panel">
+        <h3>Contour Plot</h3>
+        {% if plot_url %}
+            <img src="data:image/png;base64,{{ plot_url }}" alt="Contour Plot" class="img-fluid">
+        {% else %}
+            <p>Please select your features and submit to plot contour.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const selectors = ['x_feature', 'y_feature', 'row_feature', 'col_feature'];
+        const defaultFixValues = {
+            {% for feature, default_value in default_fixed_values.items() %}
+            '{{ feature }}': '{{ default_value }}',
+            {% endfor %}
+        };
+        
+        function updateFixFields() {
+            {% for feature in features %}
+            document.getElementById('fix_{{ feature }}').value = defaultFixValues['{{ feature }}'];
+            {% endfor %}
+            
+            selectors.forEach(function(selector) {
+                const selectedFeature = document.getElementById(selector).value;
+                if (selectedFeature) {
+                    document.getElementById('fix_' + selectedFeature).value = '';
+                }
+            });
+        }
+        
+        selectors.forEach(function(selector) {
+            document.getElementById(selector).addEventListener('change', function() {
+                updateFixFields();
+                validateSelections();
+            });
+        });
+        
+        function validateSelections() {
+            const selectedFeatures = {};
+            let hasError = false;
+            
+            selectors.forEach(function(selector) {
+                document.getElementById(selector).style.backgroundColor = '';
+            });
+            
+            selectors.forEach(function(selector) {
+                const select = document.getElementById(selector);
+                const value = select.value;
+                
+                if (value && selectedFeatures[value]) {
+                    select.style.backgroundColor = 'rgba(255, 0, 0, 0.2)';
+                    document.getElementById(selectedFeatures[value]).style.backgroundColor = 'rgba(255, 0, 0, 0.2)';
+                    hasError = true;
+                }
+                
+                if (value) {
+                    selectedFeatures[value] = selector;
+                }
+            });
+            
+            document.querySelector('button[type="submit"]').disabled = hasError;
+        }
+        
+        updateFixFields();
+        validateSelections();
+    });
+</script>
+{% endblock %}

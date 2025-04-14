@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Project{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">Delete Project</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i> Warning: This action cannot be undone.
+                    </div>
+                    
+                    <h5>Are you sure you want to delete the following project?</h5>
+                    
+                    <table class="table table-bordered mt-3">
+                        <tr>
+                            <th style="width: 40%">Project ID:</th>
+                            <td>{{ project.project_id }}</td>
+                        </tr>
+                        <tr>
+                            <th>Project Name:</th>
+                            <td>{{ project.project_name }}</td>
+                        </tr>
+                        <tr>
+                            <th>Budget:</th>
+                            <td>{{ project.budget }}</td>
+                        </tr>
+                        <tr>
+                            <th>Project Manager:</th>
+                            <td>{{ project.project_manager }}</td>
+                        </tr>
+                        <tr>
+                            <th>Customer:</th>
+                            <td>{{ project.cust_name }}</td>
+                        </tr>
+                    </table>
+                    
+                    <form method="POST">
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{{ url_for('projects') }}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash"></i> Delete Project
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

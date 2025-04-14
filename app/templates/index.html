@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Streaming Data Platform{% endblock %}
+
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow-sm mb-4">
+            <div class="card-body text-center">
+                <h2 class="mb-4">Welcome to Streaming Data Platform</h2>
+                <p class="lead">A comprehensive solution for managing and analyzing streaming data</p>
+                
+                <div class="mt-4">
+                    <img src="{{ url_for('static', filename='viet_nam_map.jpg') }}" alt="Map of Vietnam" class="img-fluid rounded border" style="max-width: 80%; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                </div>
+                
+                <div class="d-flex justify-content-center mt-4">
+                    <div class="mx-2" style="color: #da251d;">
+                        <i class="fas fa-heart fa-2x"></i>
+                    </div>
+                    <div class="mx-2 d-flex align-items-center">
+                        <div style="width: 40px; height: 30px; background-color: #da251d; position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
+                            <span style="position: absolute; color: #ffff00; font-size: 20px; top: 50%; left: 50%; transform: translate(-50%, -50%);">★</span>
+                        </div>
+                    </div>
+                    <div class="mx-2" style="color: #da251d;">
+                        <i class="fas fa-heart fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-chart-area"></i> Data Visualization</h5>
+            </div>
+            <div class="card-body">
+                <p>Explore various visualization tools for your data analysis needs:</p>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><a href="{{ url_for('optimization.contour_plot') }}" class="text-decoration-none"><i class="fas fa-chart-area"></i> Contour Plots</a></li>
+                    <li class="list-group-item"><a href="{{ url_for('raman.raman_form') }}" class="text-decoration-none"><i class="fas fa-microscope"></i> Raman Analysis</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="fas fa-database"></i> Data Management</h5>
+            </div>
+            <div class="card-body">
+                <p>Manage your data sources and processing pipelines:</p>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><a href="{{ url_for('upload.upload_csv_page') }}" class="text-decoration-none"><i class="fas fa-upload"></i> Upload Data</a></li>
+                    <li class="list-group-item"><a href="{{ url_for('query.get_query') }}" class="text-decoration-none"><i class="fas fa-search"></i> Query Data</a></li>
+                    <li class="list-group-item"><a href="{{ url_for('producer.toggle_view') }}" class="text-decoration-none"><i class="fas fa-play-circle"></i> Producer Control</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="fas fa-cogs"></i> Advanced Tools</h5>
+            </div>
+            <div class="card-body">
+                <p>Access advanced tools and optimization methods:</p>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><a href="{{ url_for('optimization.bayesian_optimization') }}" class="text-decoration-none"><i class="fas fa-cogs"></i> Bayesian Optimization</a></li>
+                    <li class="list-group-item"><a href="{{ url_for('project.projects') }}" class="text-decoration-none"><i class="fas fa-project-diagram"></i> Project Management</a></li>
+                    <li class="list-group-item"><a href="{{ url_for('customer.customers_page') }}" class="text-decoration-none"><i class="fas fa-users"></i> Customer Management</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

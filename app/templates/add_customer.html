@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block title %}Add New Customer{% endblock %}
+
+{% block page_title %}Add New Customer{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col text-end">
+        <a href="{{ url_for('customers_page') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Customers
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-10 mx-auto">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <form action="{{ url_for('add_customer_page') }}" method="post" class="needs-validation" novalidate>
+                    <div class="mb-3">
+                        <label for="cust_name" class="form-label">Customer Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="cust_name" name="cust_name" 
+                               value="{{ cust_name|default('') }}" required minlength="6" maxlength="18">
+                        <div class="form-text">Customer name must be between 6-18 characters and cannot be duplicated.</div>
+                        <div class="invalid-feedback">
+                            Please enter a customer name (6-18 characters).
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="contact_infor" class="form-label">Contact Information</label>
+                        <input type="text" class="form-control" id="contact_infor" name="contact_infor" 
+                               value="{{ contact_infor|default('') }}">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="address" class="form-label">Address</label>
+                        <textarea class="form-control" id="address" name="address" rows="3">{{ address|default('') }}</textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="country" class="form-label">Country</label>
+                        <select class="form-select" id="country" name="country">
+                            <option value="" {% if not country %}selected{% endif %}>Select a country</option>
+                            <option value="Vietnam" {% if country == 'Vietnam' %}selected{% endif %}>Vietnam</option>
+                            <option value="Singapore" {% if country == 'Singapore' %}selected{% endif %}>Singapore</option>
+                            <option value="Malaysia" {% if country == 'Malaysia' %}selected{% endif %}>Malaysia</option>
+                            <option value="Thailand" {% if country == 'Thailand' %}selected{% endif %}>Thailand</option>
+                            <option value="Japan" {% if country == 'Japan' %}selected{% endif %}>Japan</option>
+                            <option value="Korea" {% if country == 'Korea' %}selected{% endif %}>Korea</option>
+                            <option value="USA" {% if country == 'USA' %}selected{% endif %}>USA</option>
+                            <option value="UK" {% if country == 'UK' %}selected{% endif %}>UK</option>
+                            <option value="France" {% if country == 'France' %}selected{% endif %}>France</option>
+                            <option value="Germany" {% if country == 'Germany' %}selected{% endif %}>Germany</option>
+                        </select>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('customers_page') }}" class="btn btn-secondary me-md-2">Cancel</a>
+                        <button type="submit" class="btn btn-primary">Add Customer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    (function () {
+        'use strict'
+
+        var forms = document.querySelectorAll('.needs-validation')
+
+        Array.prototype.slice.call(forms)
+            .forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+
+                    form.classList.add('was-validated')
+                }, false)
+            })
+    })()
+</script>
+{% endblock %} 
