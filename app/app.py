@@ -73,11 +73,6 @@ if __name__ == "__main__":
     
     time.sleep(2)  # Give some time for services to start
 
-    # Initialize database tables
-    init_timescale_database()
-    initialize_customer_db()
-    initialize_project_db()
-
     time.sleep(2)  # Wait for database initialization to complete
 
     # Start background threads for data production and consumption
