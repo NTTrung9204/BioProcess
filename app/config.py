@@ -55,9 +55,9 @@ class PostgresConfig:
 
     TIMESTAMP = os.getenv("TIMESTAMP", "timestamp")
     SCAN = os.getenv("SCAN", "scan")
-    CUST = os.getenv("CUST", "cust")
-    SAMPLE_ID = os.getenv("SAMPLE_ID", "sample_id")
-    TEST_CAMPAING_ID = os.getenv("TEST_CAMPAING_ID", "test_campaing_id")
+    # CUST = os.getenv("CUST", "cust")
+    # SAMPLE_ID = os.getenv("SAMPLE_ID", "sample_id")
+    # TEST_CAMPAING_ID = os.getenv("TEST_CAMPAING_ID", "test_campaing_id")
     RUN_ID = os.getenv("RUN_ID", "run_id")
 
     PREDICTED_OIL = os.getenv("PREDICTED_OIL", "predicted_oil_yield")
@@ -108,10 +108,10 @@ class PostgresConfig:
     _COMMON_COLUMNS = [
         f"{TIMESTAMP} TIMESTAMP UNIQUE",
         f"{SCAN} INTEGER DEFAULT 0",
-        f"{CUST} TEXT DEFAULT NULL",
-        f"{SAMPLE_ID} TEXT DEFAULT NULL",
-        f"{TEST_CAMPAING_ID} TEXT DEFAULT NULL",
-        f"{RUN_ID} TEXT DEFAULT NULL",
+        # f"{CUST} TEXT DEFAULT NULL",
+        # f"{SAMPLE_ID} TEXT DEFAULT NULL",
+        # f"{TEST_CAMPAING_ID} TEXT DEFAULT NULL",
+        f"{RUN_ID} CHAR(8) UNIQUE REFERENCES test_campaign(batch_id) ON DELETE CASCADE",
     ]
     
     DATABASE_PILOT_TABLE_COLUMNS = _COMMON_COLUMNS.copy()

@@ -1,4 +1,5 @@
 import os
+from flask import jsonify
 import requests
 import pandas as pd
 import numpy as np
@@ -6,60 +7,73 @@ from datetime import datetime
 from app.utils import load_ml_model, load_plsr_model, predict_ml_model, predict_raman
 from app.config import PathConfig, PostgresConfig, HostConfig, KeyConfig, RouterConfig
 from app.repositories import insert_bulk_to_db
+from app.services.test_campaign_service import check_batch_id_exists
 
 def upload_csv_service(file, form_data):
-    
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    file_path = os.path.join(PathConfig.UPLOAD_FOLDER, f"{timestamp}.csv")
-    
-    file.save(file_path)
-    
-    df = pd.read_csv(file_path)
+    try:
+        batch_id = form_data[PostgresConfig.RUN_ID]
 
-    df_timestamp = df[PostgresConfig.TIMESTAMP].copy()
-    # count columns
-    num_columns = len(df.columns)
-
-    if num_columns < 50:
-        ml_model = load_ml_model()
-
-        MAPPED_COLUMNS = PostgresConfig.SENSOR_MAPPINGS
-        MAPPED_COLUMNS_POWER_BI = PostgresConfig.SENSOR_MAPPINGS_POWER_BI
-
-        df = df.rename(columns=MAPPED_COLUMNS)
-        df = df.rename(columns=MAPPED_COLUMNS_POWER_BI)
-
-        df = df[list(MAPPED_COLUMNS.values()) + list(MAPPED_COLUMNS_POWER_BI.values())]
-
-        df_features = df[PostgresConfig.PILOT_COLUMNS].astype(np.float32)
-
-        predictions = predict_ml_model(df_features, ml_model)
+        if not check_batch_id_exists(batch_id):
+            print("Batch ID not found in test campaign table!", flush=True)
+            return jsonify({"error": "Batch ID not found in test campaign table!"}), 400, False
         
-        df[PostgresConfig.PREDICTED_OIL] = predictions.astype(float)
-    else:
-        plrs_model = load_plsr_model()
-
-        df = df[PostgresConfig.FTIR_COLUMNS]
-
-        df_features = df[PostgresConfig.FTIR_COLUMNS].astype(np.float32)
-
-        predictions = predict_raman(df_features, plrs_model)
-
-        df[PostgresConfig.PREDICTED_OIL_CONCENTRATION] = predictions.astype(float)
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        file_path = os.path.join(PathConfig.UPLOAD_FOLDER, f"{timestamp}.csv")
         
-    df[PostgresConfig.TIMESTAMP] = df_timestamp
+        file.save(file_path)
+        
+        df = pd.read_csv(file_path)
 
-    for key, value in form_data.items():
-        df[key] = value
+        df_timestamp = df[PostgresConfig.TIMESTAMP].copy()
+        # count columns
+        num_columns = len(df.columns)
 
+        if num_columns < 50:
+            ml_model = load_ml_model()
+
+            MAPPED_COLUMNS = PostgresConfig.SENSOR_MAPPINGS
+            MAPPED_COLUMNS_POWER_BI = PostgresConfig.SENSOR_MAPPINGS_POWER_BI
+
+            df = df.rename(columns=MAPPED_COLUMNS)
+            df = df.rename(columns=MAPPED_COLUMNS_POWER_BI)
+
+            df = df[list(MAPPED_COLUMNS.values()) + list(MAPPED_COLUMNS_POWER_BI.values())]
+
+            df_features = df[PostgresConfig.PILOT_COLUMNS].astype(np.float32)
+
+            predictions = predict_ml_model(df_features, ml_model)
+            
+            df[PostgresConfig.PREDICTED_OIL] = predictions.astype(float)
+        else:
+            plrs_model = load_plsr_model()
+
+            df = df[PostgresConfig.FTIR_COLUMNS]
+
+            df_features = df[PostgresConfig.FTIR_COLUMNS].astype(np.float32)
+
+            predictions = predict_raman(df_features, plrs_model)
+
+            df[PostgresConfig.PREDICTED_OIL_CONCENTRATION] = predictions.astype(float)
+            
+        df[PostgresConfig.TIMESTAMP] = df_timestamp
+
+        for key, value in form_data.items():
+            df[key] = value
+
+        
+        if num_columns < 50:
+            insert_bulk_to_db(PostgresConfig.TABLE_NAME_PILOT, df)
+        else:
+            insert_bulk_to_db(PostgresConfig.TABLE_NAME_FTIR, df)
+
+        if HostConfig.HOST_TARGET:
+            send_csv_to_another_vm(file_path, form_data)
+
+        return jsonify({"message": "Upload successful and data has been inserted into the database!"}), 200, True
     
-    if num_columns < 50:
-        insert_bulk_to_db(PostgresConfig.TABLE_NAME_PILOT, df)
-    else:
-        insert_bulk_to_db(PostgresConfig.TABLE_NAME_FTIR, df)
-
-    if HostConfig.HOST_TARGET:
-        send_csv_to_another_vm(file_path, form_data)
+    except Exception as e:
+        print(f"❌ Error uploading CSV: {e}")
+        return jsonify({"error": str(e)}), 500, False
 
 def send_csv_to_another_vm(file_path, form_data):
     try:

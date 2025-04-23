@@ -4,6 +4,7 @@ import os
 import threading
 import time
 from flask_socketio import SocketIO
+# from flask_cors import CORS
 
 from app.config import HostConfig, PathConfig
 from app.repositories import init_timescale_database
@@ -12,13 +13,25 @@ from app.controllers.raman_controller import register_socket_handlers as registe
 from app.controllers.optimization_controller import register_socket_handlers as register_optimization_socket_handlers
 from app.controllers import (
     auth_bp, customer_bp, raman_bp, project_bp, optimization_bp,
-    api_bp, upload_bp, query_bp, producer_bp
+    api_bp, upload_bp, query_bp, producer_bp, operator_bp, reactor_bp,
+    feed_bp, feed_composition_bp, catalyst_bp, catalyst_composition_bp,
+    test_campaign_bp
 )
+
 
 # Create the Flask app
 def create_app():
     app = Flask(__name__)
+    # CORS(app)
     app.config["SECRET_KEY"] = "secret!"
+    
+    # Register Jinja filters
+    @app.template_filter('datetime')
+    def format_datetime(value, format='%Y-%m-%d %H:%M'):
+        """Format a datetime object to string format"""
+        if value is None:
+            return ""
+        return value.strftime(format)
     
     # Register blueprints
     app.register_blueprint(auth_bp)
@@ -30,7 +43,14 @@ def create_app():
     app.register_blueprint(upload_bp)
     app.register_blueprint(query_bp)
     app.register_blueprint(producer_bp)
-    
+    app.register_blueprint(operator_bp)
+    app.register_blueprint(reactor_bp)
+    app.register_blueprint(feed_bp)
+    app.register_blueprint(feed_composition_bp)
+    app.register_blueprint(catalyst_bp)
+    app.register_blueprint(catalyst_composition_bp)
+    app.register_blueprint(test_campaign_bp)
+
     return app
 
 # Initialize Flask and Socket.IO

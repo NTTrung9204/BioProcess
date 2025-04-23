@@ -6,6 +6,7 @@ from datetime import datetime
 from kafka import KafkaConsumer, KafkaProducer
 from app.config import KafkaConfig, PostgresConfig, HostConfig, UserConfig, PathConfig
 from app.repositories import fetch_data, insert_data_to_db
+from app.services.test_campaign_service import check_batch_id_exists
 from app.utils import (
     load_plsr_model,
     load_scaler,
@@ -202,6 +203,10 @@ def consume_kafka():
                             
                             if UserConfig.ADMIN_USERNAME not in data or data[UserConfig.ADMIN_USERNAME] != UserConfig.ADMIN_PASSWORD:
                                 print("Insufficient permissions to stream data!", flush=True)
+                                continue
+
+                            if not check_batch_id_exists(data[PostgresConfig.RUN_ID]):
+                                print("Batch ID not found in test campaign table!", flush=True)
                                 continue
 
                             if HostConfig.HOST_TARGET:

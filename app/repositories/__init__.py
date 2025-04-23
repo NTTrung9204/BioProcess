@@ -1,4 +1,10 @@
-from app.repositories.database import query_database, get_db_connection, create_table, init_timescale_database
+from app.repositories.database import query_database, get_db_connection
 from app.repositories.customer_repository import create_customer_table, get_all_customers, get_customer_by_name, add_customer, update_customer, delete_customer, search_customers
 from app.repositories.project_repository import create_project_table, get_all_projects, get_project_by_id, get_project_by_name, add_project, update_project, delete_project
-from app.repositories.data_repository import fetch_data, insert_data_to_db, insert_bulk_to_db, fetch_data_by_batch_id, fetch_new_data_by_batch_id, fetch_raman_data 
+from app.repositories.data_repository import fetch_data, insert_data_to_db, insert_bulk_to_db, fetch_data_by_batch_id, fetch_new_data_by_batch_id, fetch_raman_data, create_table, init_timescale_database
+from app.repositories.operator_repository import create_operator_table, get_all_operators, get_operator_by_name, add_operator, update_operator, delete_operator
+from app.repositories.reactor_repository import create_reactor_table, get_all_reactors, get_reactor_by_name, add_reactor, update_reactor, delete_reactor
+from app.repositories.feed_repository import create_feed_table, get_all_feeds, get_feed_by_name, add_feed, update_feed, delete_feed
+from app.repositories.feed_composition_repository import create_feed_composition_table, get_compositions_by_feed_id, get_composition_by_id, add_composition, update_composition, delete_composition, get_feed_with_compositions, get_total_percentage_for_feed
+from app.repositories.catalyst_repository import create_catalyst_table, get_all_catalysts, get_catalyst_by_name, add_catalyst, update_catalyst, delete_catalyst
+from app.repositories.catalyst_composition_repository import create_catalyst_composition_table, get_compositions_by_catalyst_id, get_composition_by_id, add_composition, update_composition, delete_composition, get_catalyst_with_compositions, get_total_percentage_for_catalyst

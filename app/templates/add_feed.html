@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Feed{% endblock %}
+
+{% block page_title %}Add New Feed{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm">
+    <div class="card-body">
+        {% if error %}
+        <div class="alert alert-danger" role="alert">
+            {{ error }}
+        </div>
+        {% endif %}
+
+        <form method="post">
+            <div class="mb-3">
+                <label for="feed_name" class="form-label">Feed Name*</label>
+                <input type="text" class="form-control" id="feed_name" name="feed_name" value="{{ feed_name }}" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="provider" class="form-label">Provider*</label>
+                <input type="text" class="form-control" id="provider" name="provider" value="{{ provider }}" required>
+            </div>
+            
+            <div class="d-flex justify-content-between">
+                <a href="{{ url_for('feed.feeds_page') }}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary">Add Feed</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %} 

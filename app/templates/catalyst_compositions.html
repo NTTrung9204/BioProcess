@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+
+{% block title %}Catalyst Compositions{% endblock %}
+
+{% block page_title %}Catalyst Compositions for: {{ catalyst.catalyst_name }}{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <a href="{{ url_for('catalyst.catalysts_page') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Catalysts
+        </a>
+        <a href="{{ url_for('catalyst_composition.add_composition_page', catalyst_id=catalyst.catalyst_id) }}" class="btn btn-primary">
+            <i class="fas fa-plus-circle"></i> Add Composition
+        </a>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Catalyst Info</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <strong>Catalyst Name:</strong> {{ catalyst.catalyst_name }}
+                </div>
+                <div class="mb-3">
+                    <strong>Provider:</strong> {{ catalyst.provider if catalyst.provider else 'N/A' }}
+                </div>
+                <div class="mb-3">
+                    <strong>Created At:</strong> {{ catalyst.created_at.strftime('%Y-%m-%d %H:%M:%S') if catalyst.created_at else '' }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">Composition Summary</h5>
+            </div>
+            <div class="card-body">
+                <div class="progress mb-3" style="height: 25px;">
+                    <div class="progress-bar" role="progressbar" 
+                         style="width: {{ (catalyst.total_percentage * 100)|round(2) }}%"
+                         aria-valuenow="{{ (catalyst.total_percentage * 100)|round(2) }}" 
+                         aria-valuemin="0" 
+                         aria-valuemax="100">
+                        {{ (catalyst.total_percentage * 100)|round(2) }}%
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <strong>Total Percentage:</strong> {{ (catalyst.total_percentage * 100)|round(2) }}%
+                </div>
+                <div class="mb-3">
+                    <strong>Remaining:</strong> {{ (remaining_percentage * 100)|round(2) }}%
+                </div>
+                {% if catalyst.total_percentage == 1.0 %}
+                <div class="alert alert-success">
+                    <i class="fas fa-check"></i> All compositions add up to 100%
+                </div>
+                {% else %}
+                <div class="alert alert-{{ 'warning' if catalyst.total_percentage < 1.0 else 'danger' }}">
+                    <i class="fas fa-exclamation-triangle"></i> 
+                    {% if catalyst.total_percentage < 1.0 %}
+                    Compositions only add up to {{ (catalyst.total_percentage * 100)|round(2) }}%. Please add more compositions.
+                    {% else %}
+                    Compositions exceed 100%. Please adjust percentages.
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if catalyst.compositions %}
+<div class="card shadow-sm">
+    <div class="card-header bg-dark text-white">
+        <h5 class="mb-0">Compositions</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Composition</th>
+                        <th>Percentage</th>
+                        <th>Provider</th>
+                        <th>Created At</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for comp in catalyst.compositions %}
+                    <tr>
+                        <td>{{ comp.id }}</td>
+                        <td>{{ comp.composition }}</td>
+                        <td>{{ (comp.percentage * 100)|round(2) }}%</td>
+                        <td>{{ comp.provider if comp.provider else 'N/A' }}</td>
+                        <td>{{ comp.created_at.strftime('%Y-%m-%d %H:%M:%S') if comp.created_at else '' }}</td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <a href="{{ url_for('catalyst_composition.edit_composition_page', composition_id=comp.id) }}" class="btn btn-sm btn-info text-white">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                                <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ loop.index }}">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </div>
+
+                            <div class="modal fade" id="deleteModal{{ loop.index }}" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            Are you sure you want to delete the composition <strong>{{ comp.composition }}</strong>?
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                            <form action="{{ url_for('catalyst_composition.delete_composition_page', composition_id=comp.id) }}" method="post">
+                                                <button type="submit" class="btn btn-danger">Delete</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="alert alert-info">
+    No compositions found for this catalyst. Please add compositions to reach 100%.
+</div>
+{% endif %}
+
+{% endblock %} 

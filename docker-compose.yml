@@ -96,7 +96,7 @@ services:
         apk add --no-cache docker-cli
         while true; do
           echo 'Restarting all containers periodically...'
-          sleep 4320000
+          sleep 432000
           docker ps -q | grep -v $(hostname) | xargs -r docker restart
           echo 'All containers restarted at $(date)'
         done

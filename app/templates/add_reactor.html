@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Reactor{% endblock %}
+
+{% block page_title %}Add New Reactor{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm">
+    <div class="card-body">
+        {% if error %}
+        <div class="alert alert-danger" role="alert">
+            {{ error }}
+        </div>
+        {% endif %}
+
+        <form method="post">
+            <div class="mb-3">
+                <label for="reactor_name" class="form-label">Reactor Name*</label>
+                <input type="text" class="form-control" id="reactor_name" name="reactor_name" value="{{ reactor_name }}" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="maintenance_day" class="form-label">Maintenance Schedule*</label>
+                <input type="datetime-local" class="form-control" id="maintenance_day" name="maintenance_day" value="{{ maintenance_day }}" required>
+                <div class="form-text">Select the date and time for maintenance.</div>
+            </div>
+            
+            <div class="d-flex justify-content-between">
+                <a href="{{ url_for('reactor.reactors_page') }}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary">Add Reactor</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %} 

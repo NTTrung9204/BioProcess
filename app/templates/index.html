@@ -10,14 +10,13 @@
         <div class="card shadow-sm mb-4">
             <div class="card-body text-center">
                 <h2 class="mb-4">Welcome to Streaming Data Platform</h2>
-                <p class="lead">A comprehensive solution for managing and analyzing streaming data</p>
-                
+
                 <div class="mt-4">
-                    <img src="{{ url_for('static', filename='viet_nam_map.jpg') }}" alt="Map of Vietnam" class="img-fluid rounded border" style="max-width: 80%; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                    <img src="{{ url_for('static', filename='home.png') }}" alt="Trung" class="img-fluid rounded border" style="max-width: 80%; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
                 </div>
                 
                 <div class="d-flex justify-content-center mt-4">
-                    <div class="mx-2" style="color: #da251d;">
+                    <!-- <div class="mx-2" style="color: #da251d;">
                         <i class="fas fa-heart fa-2x"></i>
                     </div>
                     <div class="mx-2 d-flex align-items-center">
@@ -27,6 +26,61 @@
                     </div>
                     <div class="mx-2" style="color: #da251d;">
                         <i class="fas fa-heart fa-2x"></i>
+                    </div> -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-flask"></i> Lab Resources Management</h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-3">Manage laboratory resources for your experiments:</p>
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <a href="{{ url_for('operator.operators_page') }}" class="text-decoration-none">
+                            <div class="card bg-light h-100">
+                                <div class="card-body text-center py-4">
+                                    <i class="fas fa-users fa-2x text-primary mb-2"></i>
+                                    <h6>Operators</h6>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="{{ url_for('reactor.reactors_page') }}" class="text-decoration-none">
+                            <div class="card bg-light h-100">
+                                <div class="card-body text-center py-4">
+                                    <i class="fas fa-flask fa-2x text-primary mb-2"></i>
+                                    <h6>Reactors</h6>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="{{ url_for('feed.feeds_page') }}" class="text-decoration-none">
+                            <div class="card bg-light h-100">
+                                <div class="card-body text-center py-4">
+                                    <i class="fas fa-oil-can fa-2x text-primary mb-2"></i>
+                                    <h6>Feeds</h6>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="{{ url_for('catalyst.catalysts_page') }}" class="text-decoration-none">
+                            <div class="card bg-light h-100">
+                                <div class="card-body text-center py-4">
+                                    <i class="fas fa-atom fa-2x text-primary mb-2"></i>
+                                    <h6>Catalysts</h6>
+                                </div>
+                            </div>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -37,47 +91,111 @@
 <div class="row">
     <div class="col-md-4 mb-4">
         <div class="card shadow-sm h-100">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0"><i class="fas fa-chart-area"></i> Data Visualization</h5>
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="fas fa-vials"></i> Test Campaigns</h5>
             </div>
             <div class="card-body">
-                <p>Explore various visualization tools for your data analysis needs:</p>
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item"><a href="{{ url_for('optimization.contour_plot') }}" class="text-decoration-none"><i class="fas fa-chart-area"></i> Contour Plots</a></li>
-                    <li class="list-group-item"><a href="{{ url_for('raman.raman_form') }}" class="text-decoration-none"><i class="fas fa-microscope"></i> Raman Analysis</a></li>
-                </ul>
+                <p>Manage test campaigns and experimental data:</p>
+                <div class="d-grid">
+                    <a href="{{ url_for('test_campaign.list_test_campaigns') }}" class="btn btn-info text-white my-2">
+                        <i class="fas fa-vials me-2"></i> View Test Campaigns
+                    </a>
+                    <a href="{{ url_for('test_campaign.new_test_campaign_form') }}" class="btn btn-outline-info my-2">
+                        <i class="fas fa-plus me-2"></i> New Test Campaign
+                    </a>
+                </div>
             </div>
         </div>
     </div>
     
     <div class="col-md-4 mb-4">
         <div class="card shadow-sm h-100">
-            <div class="card-header bg-success text-white">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0"><i class="fas fa-project-diagram"></i> Project Management</h5>
+            </div>
+            <div class="card-body">
+                <p>Manage your company projects and customers:</p>
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('project.projects') }}" class="btn btn-warning text-dark my-2">
+                        <i class="fas fa-project-diagram me-2"></i> View Projects
+                    </a>
+                    <a href="{{ url_for('customer.customers_page') }}" class="btn btn-outline-warning my-2">
+                        <i class="fas fa-building me-2"></i> View Customers
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="fas fa-chart-area"></i> Analysis Tools</h5>
+            </div>
+            <div class="card-body">
+                <p>Access advanced analysis and visualization tools:</p>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <a href="{{ url_for('optimization.contour_plot') }}" class="text-decoration-none">
+                            <i class="fas fa-chart-area text-danger me-2"></i> Contour Plots
+                        </a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="{{ url_for('optimization.bayesian_optimization') }}" class="text-decoration-none">
+                            <i class="fas fa-cogs text-danger me-2"></i> Bayesian Optimization
+                        </a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="{{ url_for('raman.raman_form') }}" class="text-decoration-none">
+                            <i class="fas fa-microscope text-danger me-2"></i> Raman Analysis
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-dark text-white">
                 <h5 class="mb-0"><i class="fas fa-database"></i> Data Management</h5>
             </div>
             <div class="card-body">
-                <p>Manage your data sources and processing pipelines:</p>
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item"><a href="{{ url_for('upload.upload_csv_page') }}" class="text-decoration-none"><i class="fas fa-upload"></i> Upload Data</a></li>
-                    <li class="list-group-item"><a href="{{ url_for('query.get_query') }}" class="text-decoration-none"><i class="fas fa-search"></i> Query Data</a></li>
-                    <li class="list-group-item"><a href="{{ url_for('producer.toggle_view') }}" class="text-decoration-none"><i class="fas fa-play-circle"></i> Producer Control</a></li>
-                </ul>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-md-4 mb-4">
-        <div class="card shadow-sm h-100">
-            <div class="card-header bg-info text-white">
-                <h5 class="mb-0"><i class="fas fa-cogs"></i> Advanced Tools</h5>
-            </div>
-            <div class="card-body">
-                <p>Access advanced tools and optimization methods:</p>
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item"><a href="{{ url_for('optimization.bayesian_optimization') }}" class="text-decoration-none"><i class="fas fa-cogs"></i> Bayesian Optimization</a></li>
-                    <li class="list-group-item"><a href="{{ url_for('project.projects') }}" class="text-decoration-none"><i class="fas fa-project-diagram"></i> Project Management</a></li>
-                    <li class="list-group-item"><a href="{{ url_for('customer.customers_page') }}" class="text-decoration-none"><i class="fas fa-users"></i> Customer Management</a></li>
-                </ul>
+                <p>Manage your data sources and processing:</p>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <a href="{{ url_for('upload.upload_csv_page') }}" class="text-decoration-none">
+                            <div class="card bg-light h-100">
+                                <div class="card-body text-center py-3">
+                                    <i class="fas fa-upload fa-2x text-dark mb-2"></i>
+                                    <h6>Upload Data</h6>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-md-4">
+                        <a href="{{ url_for('producer.toggle_view') }}" class="text-decoration-none">
+                            <div class="card bg-light h-100">
+                                <div class="card-body text-center py-3">
+                                    <i class="fas fa-play-circle fa-2x text-dark mb-2"></i>
+                                    <h6>Producer</h6>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-md-4">
+                        <a href="{{ url_for('query.get_query') }}" class="text-decoration-none">
+                            <div class="card bg-light h-100">
+                                <div class="card-body text-center py-3">
+                                    <i class="fas fa-search fa-2x text-dark mb-2"></i>
+                                    <h6>Query Data</h6>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

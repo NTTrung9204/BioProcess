@@ -15,10 +15,12 @@ def login_required(f):
 def check_login(username, password):
     error, next_page = None, None
 
+    name = username
+
     username, password = hash256(username), hash256(password)
     
     if username in UserConfig.UserDBInstance and UserConfig.UserDBInstance[username] == password:
-        session['username'] = username
+        session['username'] = name
 
         next_page = request.args.get('next')
     else:

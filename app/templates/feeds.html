@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+
+{% block title %}Feed Management{% endblock %}
+
+{% block page_title %}Feed Management{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-6">
+        <a href="{{ url_for('feed.add_feed_page') }}" class="btn btn-primary">
+            <i class="fas fa-plus-circle"></i> Add Feed
+        </a>
+    </div>
+    <div class="col-md-6">
+        <div class="input-group">
+            <span class="input-group-text"><i class="fas fa-search"></i></span>
+            <input type="text" id="searchInput" class="form-control" placeholder="Search feeds...">
+        </div>
+    </div>
+</div>
+
+{% if feeds %}
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i> Feeds highlighted in <span class="badge bg-danger">red</span> have compositions that don't add up to 100%.
+        </div>
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Feed Name</th>
+                        <th>Provider</th>
+                        <th>Composition</th>
+                        <th>Created At</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="feedTableBody">
+                    {% for feed in feeds %}
+                    <tr class="{{ 'table-danger' if not feed.is_complete }} feed-row" data-name="{{ feed.feed_name.lower() }}" data-provider="{{ feed.provider.lower() if feed.provider else '' }}">
+                        <td>{{ feed.feed_id }}</td>
+                        <td>
+                            {{ feed.feed_name }}
+                            {% if not feed.is_complete %}
+                            <span class="badge bg-danger" data-bs-toggle="tooltip" title="Compositions don't add up to 100%">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td>{{ feed.provider }}</td>
+                        <td>
+                            <div class="progress" style="height: 20px;">
+                                <div class="progress-bar {% if feed.is_complete %}bg-success{% else %}bg-warning{% endif %}" 
+                                     role="progressbar" 
+                                     style="width: {{ (feed.total_percentage * 100)|round(2) }}%;" 
+                                     aria-valuenow="{{ (feed.total_percentage * 100)|round(2) }}" 
+                                     aria-valuemin="0" 
+                                     aria-valuemax="100">
+                                    {{ (feed.total_percentage * 100)|round(0) }}%
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ feed.created_at.strftime('%Y-%m-%d %H:%M:%S') if feed.created_at else '' }}</td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <a href="{{ url_for('feed.edit_feed_page', feed_name=feed.feed_name) }}" class="btn btn-sm btn-info text-white">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                                <a href="{{ url_for('feed_composition.manage_compositions_page', feed_id=feed.feed_id) }}" class="btn btn-sm btn-success text-white">
+                                    <i class="fas fa-flask"></i> Compositions
+                                </a>
+                                <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ loop.index }}">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </div>
+
+                            <div class="modal fade" id="deleteModal{{ loop.index }}" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            Are you sure you want to delete the feed <strong>{{ feed.feed_name }}</strong>?
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                            <form action="{{ url_for('feed.delete_feed_page', feed_name=feed.feed_name) }}" method="post">
+                                                <button type="submit" class="btn btn-danger">Delete</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div id="noResultsMessage" class="alert alert-info d-none">
+            No feeds found matching your search.
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="alert alert-info">
+    No feeds found. Please add a new feed!
+</div>
+{% endif %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+
+        // Search functionality
+        const searchInput = document.getElementById('searchInput');
+        const feedRows = document.querySelectorAll('.feed-row');
+        const noResultsMessage = document.getElementById('noResultsMessage');
+
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase().trim();
+            let visibleCount = 0;
+
+            feedRows.forEach(row => {
+                const feedName = row.getAttribute('data-name');
+                const feedProvider = row.getAttribute('data-provider');
+                
+                if (feedName.includes(searchTerm) || feedProvider.includes(searchTerm)) {
+                    row.classList.remove('d-none');
+                    visibleCount++;
+                } else {
+                    row.classList.add('d-none');
+                }
+            });
+
+            // Show or hide the "no results" message
+            if (visibleCount === 0 && searchTerm !== '') {
+                noResultsMessage.classList.remove('d-none');
+            } else {
+                noResultsMessage.classList.add('d-none');
+            }
+        });
+    });
+</script>
+{% endblock %}
+
+{% endblock %} 

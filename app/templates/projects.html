@@ -41,6 +41,7 @@
                                 <th>Budget</th>
                                 <th>Project Manager</th>
                                 <th>Customer</th>
+                                <th>Created At</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -52,6 +53,7 @@
                                     <td>{{ project.budget }}</td>
                                     <td>{{ project.project_manager }}</td>
                                     <td>{{ project.cust_name }}</td>
+                                    <td>{{ project.created_at }}</td>
                                     <td>
                                         <div class="btn-group" role="group">
                                             <a href="{{ url_for('project.edit_project', project_id=project.project_id) }}" class="btn btn-sm btn-info text-white">

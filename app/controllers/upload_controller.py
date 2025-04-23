@@ -13,7 +13,8 @@ def upload_csv_page():
     
     for column_def in PostgresConfig._COMMON_COLUMNS:
         parts = column_def.split()
-        if len(parts) < 4:
+
+        if PostgresConfig.TIMESTAMP in column_def:
             continue
             
         column_name = parts[0] 
@@ -38,13 +39,9 @@ def upload_csv_view():
 
     try:
         form_data = {key: value for key, value in request.form.items()}
-        upload_csv_service(file, form_data)
+        json_message, status_code, success = upload_csv_service(file, form_data)
 
-        return jsonify(
-            {
-                "message": "Upload successful and data has been inserted into the database!"
-            }
-        )
+        return json_message, status_code
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500 

@@ -4,7 +4,36 @@ import psycopg2
 from app.config import PostgresConfig
 from app.repositories.database import get_db_connection
 
+def create_table(table_name, columns, config=PostgresConfig.POSTGRES_CONFIG):
+    """
+    Create a table in the database if it doesn't exist
+    """
+    conn = get_db_connection(config)
+    if conn is None:
+        return
+
+    try:
+        with conn.cursor() as cur:
+            column_definitions = ",\n        ".join(columns)
+            query = f"""
+                CREATE TABLE IF NOT EXISTS {table_name} (
+                    id UUID DEFAULT gen_random_uuid(),
+                    {column_definitions},
+                    PRIMARY KEY (id, {PostgresConfig.TIMESTAMP})
+                );
+            """
+            cur.execute(query)
+            conn.commit()
+            print(f"✅ Table '{table_name}' created successfully.")
+    except Exception as e:
+        print(f"❌ Error when creating table '{table_name}': {e}")
+    finally:
+        conn.close()
+
 def init_timescale_database():
+    """
+    Initialize the TimescaleDB database with required tables and extensions
+    """
     print("🚀 Initializing TimescaleDB database...")
     
     conn = get_db_connection(PostgresConfig.POSTGRES_CONFIG)
@@ -34,9 +63,9 @@ def init_timescale_database():
             common_cols = [
                 f"{PostgresConfig.TIMESTAMP} TIMESTAMP NOT NULL",
                 f"{PostgresConfig.SCAN} INTEGER DEFAULT 0",
-                f"{PostgresConfig.CUST} TEXT DEFAULT NULL",
-                f"{PostgresConfig.SAMPLE_ID} TEXT DEFAULT NULL",
-                f"{PostgresConfig.TEST_CAMPAING_ID} TEXT DEFAULT NULL",
+                # f"{PostgresConfig.CUST} TEXT DEFAULT NULL",
+                # f"{PostgresConfig.SAMPLE_ID} TEXT DEFAULT NULL",
+                # f"{PostgresConfig.TEST_CAMPAING_ID} TEXT DEFAULT NULL",
                 f"{PostgresConfig.RUN_ID} TEXT DEFAULT NULL"
             ]
             
@@ -57,7 +86,7 @@ def init_timescale_database():
             try:
                 cur.execute(f"""
                     CREATE TABLE IF NOT EXISTS {operation_table} (
-                        id SERIAL,
+                        id UUID DEFAULT gen_random_uuid(),
                         {operation_columns_sql},
                         PRIMARY KEY (id, {PostgresConfig.TIMESTAMP})
                     );
@@ -85,7 +114,7 @@ def init_timescale_database():
             try:
                 cur.execute(f"""
                     CREATE TABLE IF NOT EXISTS {raman_table} (
-                        id SERIAL,
+                        id UUID DEFAULT gen_random_uuid(),
                         {raman_columns_sql},
                         PRIMARY KEY (id, {PostgresConfig.TIMESTAMP})
                     );
@@ -118,8 +147,9 @@ def init_timescale_database():
                 temp_table = PostgresConfig.TABLE_NAME_TEMP
                 cur.execute(f"""
                     CREATE TABLE IF NOT EXISTS {temp_table} (
-                        id SERIAL PRIMARY KEY,
-                        {operation_columns_sql}
+                        id UUID DEFAULT gen_random_uuid(),
+                        {operation_columns_sql},
+                        PRIMARY KEY (id, {PostgresConfig.TIMESTAMP})
                     );
                 """)
                 print(f"✅ Table {temp_table} created")
@@ -132,7 +162,7 @@ def init_timescale_database():
         print(f"❌ Unexpected error during database initialization: {e}")
         return False
     finally:
-        conn.close()
+        conn.close() 
 
 def fetch_data():
     conn = psycopg2.connect(**PostgresConfig.POSTGRES_CONFIG_TEMP)

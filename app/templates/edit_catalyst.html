@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Catalyst{% endblock %}
+
+{% block page_title %}Edit Catalyst: {{ catalyst.catalyst_name }}{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm">
+    <div class="card-body">
+        {% if error %}
+        <div class="alert alert-danger" role="alert">
+            {{ error }}
+        </div>
+        {% endif %}
+
+        <form method="post">
+            <div class="mb-3">
+                <label for="catalyst_name" class="form-label">Catalyst Name</label>
+                <input type="text" class="form-control" id="catalyst_name" value="{{ catalyst.catalyst_name }}" disabled>
+                <div class="form-text">Catalyst name cannot be changed.</div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="provider" class="form-label">Provider*</label>
+                <input type="text" class="form-control" id="provider" name="provider" value="{{ catalyst.provider }}" required>
+            </div>
+            
+            <div class="d-flex justify-content-between">
+                <a href="{{ url_for('catalyst.catalysts_page') }}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary">Update Catalyst</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %} 

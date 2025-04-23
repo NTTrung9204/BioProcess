@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Operator{% endblock %}
+
+{% block page_title %}Add New Operator{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm">
+    <div class="card-body">
+        {% if error %}
+        <div class="alert alert-danger" role="alert">
+            {{ error }}
+        </div>
+        {% endif %}
+
+        <form method="post">
+            <div class="mb-3">
+                <label for="operator_name" class="form-label">Operator Name*</label>
+                <input type="text" class="form-control" id="operator_name" name="operator_name" value="{{ operator_name }}" required>
+                <div class="form-text">Must be between 6-18 characters.</div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="level" class="form-label">Level*</label>
+                <input type="text" class="form-control" id="level" name="level" value="{{ level }}" required>
+            </div>
+            
+            <div class="d-flex justify-content-between">
+                <a href="{{ url_for('operator.operators_page') }}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary">Add Operator</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %} 

@@ -2,6 +2,7 @@ from app.repositories import (
     create_project_table, get_all_projects, get_project_by_id, 
     add_project, update_project, delete_project
 )
+from app.repositories.customer_repository import get_customer_by_name
 
 def initialize_project_db():
     return create_project_table()
@@ -24,7 +25,11 @@ def add_project_service(project_name, budget, project_manager, cust_name):
     except ValueError:
         return False, "Budget must be a valid number"
     
-    return add_project(project_name.strip(), budget_value, project_manager.strip(), cust_name)
+    customer = get_customer_by_name(cust_name)
+    if not customer:
+        return False, f"Customer '{cust_name}' not found"
+    
+    return add_project(project_name.strip(), budget_value, project_manager.strip(), customer["cust_id"])
 
 def update_project_service(project_id, project_name, budget, project_manager, cust_name):
     project = get_project_by_id(project_id)
@@ -42,7 +47,11 @@ def update_project_service(project_id, project_name, budget, project_manager, cu
     except ValueError:
         return False, "Budget must be a valid number"
     
-    return update_project(project_id, project_name.strip(), budget_value, project_manager.strip(), cust_name)
+    customer = get_customer_by_name(cust_name)
+    if not customer:
+        return False, f"Customer '{cust_name}' not found"
+    
+    return update_project(project_id, project_name.strip(), budget_value, project_manager.strip(), customer["cust_id"])
 
 def delete_project_service(project_id):
     return delete_project(project_id) 

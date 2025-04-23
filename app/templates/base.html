@@ -202,6 +202,7 @@
         }
     </style>
     {% block head_extra %}{% endblock %}
+    {% block styles %}{% endblock %}
 </head>
 <body>
     <!-- Sidebar -->
@@ -211,27 +212,44 @@
         <div class="sidebar-section">
             <h3>Main Menu</h3>
             <ul>
-                <li><a href="{{ url_for('auth.home') }}"><i class="fas fa-home"></i> <span>Dashboard</span></a></li>
-                <li><a href="{{ url_for('project.projects') }}"><i class="fas fa-project-diagram"></i> <span>Projects</span></a></li>
-                <li><a href="{{ url_for('customer.customers_page') }}"><i class="fas fa-users"></i> <span>Customers</span></a></li>
+                <li><a href="{{ url_for('auth.home') }}" id="nav-home"><i class="fas fa-home"></i> <span>Dashboard</span></a></li>
+                <li><a href="{{ url_for('project.projects') }}" id="nav-project"><i class="fas fa-project-diagram"></i> <span>Projects</span></a></li>
+                <li><a href="{{ url_for('customer.customers_page') }}" id="nav-customer"><i class="fas fa-building"></i> <span>Customers</span></a></li>
+            </ul>
+        </div>
+        
+        <div class="sidebar-section">
+            <h3>Lab Resources</h3>
+            <ul>
+                <li><a href="{{ url_for('operator.operators_page') }}" id="nav-operator"><i class="fas fa-users"></i> <span>Operators</span></a></li>
+                <li><a href="{{ url_for('reactor.reactors_page') }}" id="nav-reactor"><i class="fas fa-flask"></i> <span>Reactors</span></a></li>
+                <li><a href="{{ url_for('feed.feeds_page') }}" id="nav-feed"><i class="fas fa-oil-can"></i> <span>Feeds</span></a></li>
+                <li><a href="{{ url_for('catalyst.catalysts_page') }}" id="nav-catalyst"><i class="fas fa-atom"></i> <span>Catalysts</span></a></li>
+            </ul>
+        </div>
+        
+        <div class="sidebar-section">
+            <h3>Test Campaign</h3>
+            <ul>
+                <li><a href="{{ url_for('test_campaign.list_test_campaigns') }}" id="nav-test-campaign"><i class="fas fa-vials"></i> <span>Test Campaigns</span></a></li>
             </ul>
         </div>
         
         <div class="sidebar-section">
             <h3>Data Management</h3>
             <ul>
-                <li><a href="{{ url_for('upload.upload_csv_page') }}"><i class="fas fa-upload"></i> <span>Upload Data</span></a></li>
-                <li><a href="{{ url_for('producer.toggle_view') }}"><i class="fas fa-play-circle"></i> <span>Producer Control</span></a></li>
-                <li><a href="{{ url_for('query.get_query') }}"><i class="fas fa-search"></i> <span>Query Data</span></a></li>
+                <li><a href="{{ url_for('upload.upload_csv_page') }}" id="nav-upload"><i class="fas fa-upload"></i> <span>Upload Data</span></a></li>
+                <li><a href="{{ url_for('producer.toggle_view') }}" id="nav-producer"><i class="fas fa-play-circle"></i> <span>Producer Control</span></a></li>
+                <li><a href="{{ url_for('query.get_query') }}" id="nav-query"><i class="fas fa-search"></i> <span>Query Data</span></a></li>
             </ul>
         </div>
         
         <div class="sidebar-section">
             <h3>Analysis</h3>
             <ul>
-                <li><a href="{{ url_for('optimization.contour_plot') }}"><i class="fas fa-chart-area"></i> <span>Contour Plot</span></a></li>
-                <li><a href="{{ url_for('optimization.bayesian_optimization') }}"><i class="fas fa-cogs"></i> <span>Optimization</span></a></li>
-                <li><a href="{{ url_for('raman.raman_form') }}"><i class="fas fa-microscope"></i> <span>Raman Analysis</span></a></li>
+                <li><a href="{{ url_for('optimization.contour_plot') }}" id="nav-contour"><i class="fas fa-chart-area"></i> <span>Contour Plot</span></a></li>
+                <li><a href="{{ url_for('optimization.bayesian_optimization') }}" id="nav-optimization"><i class="fas fa-cogs"></i> <span>Optimization</span></a></li>
+                <li><a href="{{ url_for('raman.raman_form') }}" id="nav-raman"><i class="fas fa-microscope"></i> <span>Raman Analysis</span></a></li>
             </ul>
         </div>
         
@@ -240,6 +258,13 @@
             <h3>Account</h3>
             <ul>
                 <li><a href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a></li>
+            </ul>
+        </div>
+        {% else %}
+        <div class="sidebar-section">
+            <h3>Account</h3>
+            <ul>
+                <li><a href="{{ url_for('auth.login') }}"><i class="fas fa-sign-in-alt"></i> <span>Login</span></a></li>
             </ul>
         </div>
         {% endif %}
@@ -253,7 +278,12 @@
             
             {% if session.username %}
             <div class="user-menu">
-                <span class="user-name"><i class="fas fa-user"></i> Welcome!</span>
+                <span class="user-name"><i class="fas fa-user"></i> {{ session.username }}</span>
+                <a href="{{ url_for('auth.logout') }}" class="btn btn-sm btn-outline-secondary"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
+            {% else %}
+            <div class="user-menu">
+                <a href="{{ url_for('auth.login') }}" class="btn btn-sm btn-primary"><i class="fas fa-sign-in-alt"></i> Login</a>
             </div>
             {% endif %}
         </div>
@@ -263,7 +293,10 @@
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
                     {% for category, message in messages %}
-                        
+                        <div class="alert alert-{{ category if category != 'message' else 'info' }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
                     {% endfor %}
                 {% endif %}
             {% endwith %}
@@ -275,24 +308,17 @@
         <footer class="footer">
             <div class="container">
                 <div class="row">
-                    <div class="col-md-6">
-                        <p></p>
-                    </div>
-                    <div class="col-md-6 text-md-end">
-                        <p></p>
-                    </div>
+                    
                 </div>
             </div>
         </footer>
     </div>
 
-    <!-- Bootstrap JS Bundle with Popper -->
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
-    <!-- Optional: jQuery (some Bootstrap plugins require it) -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     
-    <!-- Your custom JavaScript -->
     {% block scripts %}{% endblock %}
 </body>
 </html> 

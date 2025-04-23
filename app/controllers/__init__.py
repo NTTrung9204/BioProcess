@@ -8,3 +8,10 @@ from app.controllers.api_controller import api_bp
 from app.controllers.upload_controller import upload_bp
 from app.controllers.query_controller import query_bp
 from app.controllers.producer_controller import producer_bp
+from app.controllers.operator_controller import operator_bp
+from app.controllers.reactor_controller import reactor_bp
+from app.controllers.feed_controller import feed_bp
+from app.controllers.feed_composition_controller import feed_composition_bp
+from app.controllers.catalyst_controller import catalyst_bp
+from app.controllers.catalyst_composition_controller import catalyst_composition_bp
+from app.controllers.test_campaign_controller import test_campaign_bp

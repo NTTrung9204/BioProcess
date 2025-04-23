@@ -18,11 +18,12 @@ def create_customer_table():
         with conn.cursor() as cur:
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS customer (
-                    cust_id UUID DEFAULT gen_random_uuid() UNIQUE,
-                    cust_name VARCHAR(18) PRIMARY KEY CHECK (LENGTH(cust_name) >= 6 AND LENGTH(cust_name) <= 18),
+                    cust_id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+                    cust_name VARCHAR(18) UNIQUE CHECK (LENGTH(cust_name) >= 6 AND LENGTH(cust_name) <= 18),
                     contact_infor TEXT,
                     address TEXT,
-                    country VARCHAR(100)
+                    country VARCHAR(100),
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );
             """)
             print("✅ Table customer created successfully")
@@ -43,7 +44,7 @@ def get_all_customers():
     
     try:
         with conn.cursor() as cur:
-            cur.execute("SELECT cust_id, cust_name, contact_infor, address, country FROM customer ORDER BY cust_name")
+            cur.execute("SELECT cust_id, cust_name, contact_infor, address, country, created_at FROM customer ORDER BY cust_name")
             customers = cur.fetchall()
             
             result = []
@@ -53,7 +54,8 @@ def get_all_customers():
                     "cust_name": customer[1],
                     "contact_infor": customer[2],
                     "address": customer[3],
-                    "country": customer[4]
+                    "country": customer[4],
+                    "created_at": customer[5]
                 })
             
             return result
@@ -73,7 +75,7 @@ def get_customer_by_name(cust_name):
     
     try:
         with conn.cursor() as cur:
-            cur.execute("SELECT cust_id, cust_name, contact_infor, address, country FROM customer WHERE cust_name = %s", (cust_name,))
+            cur.execute("SELECT cust_id, cust_name, contact_infor, address, country, created_at FROM customer WHERE cust_name = %s", (cust_name,))
             customer = cur.fetchone()
             
             if customer:
@@ -82,7 +84,8 @@ def get_customer_by_name(cust_name):
                     "cust_name": customer[1],
                     "contact_infor": customer[2],
                     "address": customer[3],
-                    "country": customer[4]
+                    "country": customer[4],
+                    "created_at": customer[5]
                 }
             return None
     except Exception as e:

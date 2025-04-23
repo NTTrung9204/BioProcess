@@ -9,6 +9,7 @@ project_bp = Blueprint('project', __name__, url_prefix='/projects')
 @login_required
 def projects():
     projects_list = get_projects_service()
+    print(projects_list, "projects_list", flush=True)
     return render_template('projects.html', projects=projects_list)
 
 @project_bp.route('/add', methods=['GET', 'POST'])
@@ -21,7 +22,7 @@ def add_project():
         cust_name = request.form.get('cust_name')
         
         result, message = add_project_service(project_name, budget, project_manager, cust_name)
-        
+
         if result:
             flash('Project added successfully!', 'success')
             return redirect(url_for('project.projects'))

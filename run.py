@@ -1,6 +1,13 @@
 from app.app import app, socketio
 from app.repositories import init_timescale_database
-from app.services import produce_data, consume_kafka, initialize_customer_db, initialize_project_db
+from app.services import (
+    produce_data, consume_kafka, 
+    initialize_customer_db, initialize_project_db, 
+    initialize_operator_db, initialize_reactor_db, 
+    initialize_feed_db, initialize_catalyst_db,
+    initialize_feed_composition_db, initialize_catalyst_composition_db,
+    initialize_test_campaign_db
+)
 import threading
 import time
 import os
@@ -15,18 +22,25 @@ if __name__ == "__main__":
     init_timescale_database()
     initialize_customer_db()
     initialize_project_db()
+    initialize_operator_db()
+    initialize_reactor_db()
+    initialize_feed_db()
+    initialize_catalyst_db()
+    initialize_feed_composition_db()
+    initialize_catalyst_composition_db()
+    initialize_test_campaign_db()
+
+    
 
     time.sleep(2)  # Wait for database initialization to complete
 
-    # Start background threads for data production and consumption
     print("🔄 Starting background services...")
-    threading.Thread(target=produce_data, daemon=True).start()
+    # threading.Thread(target=produce_data, daemon=True).start()
     threading.Thread(target=consume_kafka, daemon=True).start()
     
-    port = int(os.environ.get("PORT", 5000))
+    port = int(HostConfig.HOST_PORT)
     print(f"🌐 Starting web server on port {port}...")
     
-    # Start the Flask application with Socket.IO
     socketio.run(
         app, 
         host="0.0.0.0", 

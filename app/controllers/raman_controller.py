@@ -30,16 +30,19 @@ def raman_plot():
         return render_template('raman_plot.html')
     
     elif request.method == 'POST':
+        print("POST request received", flush=True)
         try:
             batch_id = request.form.get('batch_id')
             start_time = request.form.get('start_time')
             end_time = request.form.get('end_time')
+            print(f"Batch ID: {batch_id}, Start Time: {start_time}, End Time: {end_time}", flush=True)
 
             if not all([batch_id, start_time, end_time]):
                 return jsonify({
                     'error': 'Please provide batch ID, start time, and end time'
                 }), 400
 
+            print(f"Batch ID: {batch_id}, Start Time: {start_time}, End Time: {end_time}", flush=True)
             df, plot_image, error = raman_plot_in_range(batch_id, start_time, end_time)
 
             if error:

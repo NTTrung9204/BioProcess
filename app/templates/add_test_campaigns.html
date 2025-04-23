@@ -1,0 +1,395 @@
+{% extends "base.html" %}
+
+{% block title %}New Test Campaign{% endblock %}
+
+{% block styles %}
+<style>
+.suggestion-container {
+    position: relative;
+}
+.suggestions-list {
+    position: absolute;
+    z-index: 1000;
+    width: 100%;
+    max-height: 200px;
+    overflow-y: auto;
+    background-color: white;
+    display: none;
+    margin-top: 2px;
+    border-radius: 0.25rem;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+}
+/* Sử dụng .list-group-item của Bootstrap thay cho các custom style cũ */
+.input-group {
+    transition: all 0.3s ease;
+}
+.entity-search:focus {
+    box-shadow: none;
+    border-color: #86b7fe;
+}
+.input-group:focus-within {
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+    border-radius: 0.25rem;
+}
+.input-group .btn {
+    transition: all 0.3s ease;
+}
+.input-group:focus-within .btn-outline-secondary {
+    border-color: #86b7fe;
+    color: #0d6efd;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1>New Test Campaign</h1>
+        </div>
+        <div class="col-auto">
+            <a href="{{ url_for('test_campaign.list_test_campaigns') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Back to List
+            </a>
+        </div>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category if category not in ['message', 'danger'] else 'info' if category == 'message' else 'danger' }} alert-dismissible fade show" role="alert">
+                    {% if 'Batch ID:' in message %}
+                        {{ message.split('Batch ID:')[0] }} <strong>Batch ID: <span class="badge bg-{{ category if category == 'success' else 'secondary' }}">{{ message.split('Batch ID:')[1] }}</span></strong>
+                    {% else %}
+                        {{ message }}
+                    {% endif %}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Test Campaign Details</h5>
+        </div>
+        <div class="card-body">
+            <form id="newTestCampaignForm" method="POST" action="{{ url_for('test_campaign.create_test_campaign') }}">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label for="test_campaign_name" class="form-label">Test Campaign Name <span class="text-danger">*</span></label>
+                            <input type="text" id="test_campaign_name" name="test_campaign_name" class="form-control" required minlength="8" maxlength="24">
+                            <small class="form-text text-muted">Must be between 8-24 characters and unique</small>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="operator_name" class="form-label">Operator <span class="text-danger">*</span></label>
+                            <div class="suggestion-container">
+                                <div class="input-group">
+                                    <input type="text" id="operator_name" name="operator_name" class="form-control entity-search" data-entity-type="operator" required autocomplete="off">
+                                    <button class="btn btn-outline-secondary" type="button" onclick="searchEntity('operator')">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                </div>
+                                <div id="operator-suggestions" class="suggestions-list list-group"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="reactor_name" class="form-label">Reactor <span class="text-danger">*</span></label>
+                            <div class="suggestion-container">
+                                <div class="input-group">
+                                    <input type="text" id="reactor_name" name="reactor_name" class="form-control entity-search" data-entity-type="reactor" required autocomplete="off">
+                                    <button class="btn btn-outline-secondary" type="button" onclick="searchEntity('reactor')">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                </div>
+                                <div id="reactor-suggestions" class="suggestions-list list-group"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="feed_name" class="form-label">Feed <span class="text-danger">*</span></label>
+                            <div class="suggestion-container">
+                                <div class="input-group">
+                                    <input type="text" id="feed_name" name="feed_name" class="form-control entity-search" data-entity-type="feed" required autocomplete="off">
+                                    <button class="btn btn-outline-secondary" type="button" onclick="searchEntity('feed')">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                </div>
+                                <div id="feed-suggestions" class="suggestions-list list-group"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label for="catalyst_name" class="form-label">Catalyst <span class="text-danger">*</span></label>
+                            <div class="suggestion-container">
+                                <div class="input-group">
+                                    <input type="text" id="catalyst_name" name="catalyst_name" class="form-control entity-search" data-entity-type="catalyst" required autocomplete="off">
+                                    <button class="btn btn-outline-secondary" type="button" onclick="searchEntity('catalyst')">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                </div>
+                                <div id="catalyst-suggestions" class="suggestions-list list-group"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="project_name" class="form-label">Project <span class="text-danger">*</span></label>
+                            <div class="suggestion-container">
+                                <div class="input-group">
+                                    <input type="text" id="project_name" name="project_name" class="form-control entity-search" data-entity-type="project" required autocomplete="off">
+                                    <button class="btn btn-outline-secondary" type="button" onclick="searchEntity('project')">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                </div>
+                                <div id="project-suggestions" class="suggestions-list list-group"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> A unique batch ID will be automatically generated for the test campaign.
+                </div>
+
+                <div class="mt-4 text-end">
+                    <a href="{{ url_for('test_campaign.list_test_campaigns') }}" class="btn btn-outline-secondary me-2">Cancel</a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Create Test Campaign
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Highlight the current page in the navigation
+    $('#nav-test-campaign').addClass('active');
+    
+    // Set up event listeners for all entity search fields
+    setupEntitySearchFields();
+    
+    // Form validation
+    $('#newTestCampaignForm').on('submit', function(e) {
+        const testCampaignName = $('#test_campaign_name').val().trim();
+        if (testCampaignName.length < 8 || testCampaignName.length > 24) {
+            alert('Test campaign name must be between 8-24 characters');
+            e.preventDefault();
+            return false;
+        }
+        
+        // Check all required fields
+        let missingFields = [];
+        $('.entity-search').each(function() {
+            if (!$(this).val().trim()) {
+                const label = $(this).closest('.form-group').find('label').text().replace('*', '').trim();
+                missingFields.push(label);
+            }
+        });
+        
+        if (missingFields.length > 0) {
+            alert(`Please fill out the following required fields: ${missingFields.join(', ')}`);
+            e.preventDefault();
+            return false;
+        }
+        
+        return true;
+    });
+});
+
+// Set up typing timers for entity search fields
+let typingTimers = {};
+const doneTypingInterval = 300; // ms
+
+function setupEntitySearchFields() {
+    // Add input event listeners to all entity search fields
+    document.querySelectorAll('.entity-search').forEach(input => {
+        const entityType = input.dataset.entityType;
+        
+        // Input event for typing
+        input.addEventListener('input', function() {
+            const searchTerm = this.value.trim();
+            
+            // Clear any previous timer
+            clearTimeout(typingTimers[entityType]);
+            
+            // Hide suggestions if search term is too short
+            if (searchTerm.length < 2) {
+                document.getElementById(`${entityType}-suggestions`).style.display = 'none';
+                return;
+            }
+            
+            // Set a timer for when user stops typing
+            typingTimers[entityType] = setTimeout(() => {
+                searchEntity(entityType);
+            }, doneTypingInterval);
+        });
+        
+        // Focus event to show suggestions if there's text
+        input.addEventListener('focus', function() {
+            const searchTerm = this.value.trim();
+            if (searchTerm.length >= 2) {
+                searchEntity(entityType);
+            }
+        });
+        
+        // Keyboard navigation
+        input.addEventListener('keydown', function(e) {
+            const suggestionsList = document.getElementById(`${entityType}-suggestions`);
+            if (suggestionsList.style.display !== 'block') return;
+            
+            const items = suggestionsList.querySelectorAll('.list-group-item-action');
+            if (items.length === 0) return;
+            
+            // Find currently focused item
+            const focusedItem = suggestionsList.querySelector('.active');
+            const focusedIndex = Array.from(items).indexOf(focusedItem);
+            
+            switch (e.key) {
+                case 'ArrowDown':
+                    e.preventDefault();
+                    if (focusedItem) {
+                        // Move to next item or first if at end
+                        const nextIndex = (focusedIndex + 1) % items.length;
+                        focusedItem.classList.remove('active');
+                        items[nextIndex].classList.add('active');
+                        items[nextIndex].scrollIntoView({ block: 'nearest' });
+                    } else {
+                        // Focus first item if none focused
+                        items[0].classList.add('active');
+                        items[0].scrollIntoView({ block: 'nearest' });
+                    }
+                    break;
+                    
+                case 'ArrowUp':
+                    e.preventDefault();
+                    if (focusedItem) {
+                        // Move to previous item or last if at start
+                        const prevIndex = (focusedIndex - 1 + items.length) % items.length;
+                        focusedItem.classList.remove('active');
+                        items[prevIndex].classList.add('active');
+                        items[prevIndex].scrollIntoView({ block: 'nearest' });
+                    } else {
+                        // Focus last item if none focused
+                        items[items.length - 1].classList.add('active');
+                        items[items.length - 1].scrollIntoView({ block: 'nearest' });
+                    }
+                    break;
+                    
+                case 'Enter':
+                    if (focusedItem) {
+                        e.preventDefault();
+                        input.value = focusedItem.dataset.value;
+                        suggestionsList.style.display = 'none';
+                    }
+                    break;
+                    
+                case 'Escape':
+                    suggestionsList.style.display = 'none';
+                    break;
+            }
+        });
+    });
+    
+    // Hide suggestions when clicking outside
+    document.addEventListener('click', function(event) {
+        const entityTypes = ['operator', 'reactor', 'feed', 'catalyst', 'project'];
+        
+        entityTypes.forEach(type => {
+            const input = document.getElementById(`${type}_name`);
+            const suggestions = document.getElementById(`${type}-suggestions`);
+            const searchButton = input.nextElementSibling;
+            
+            if (!event.target.closest(`#${type}_name`) && 
+                !event.target.closest(`#${type}-suggestions`) &&
+                event.target !== searchButton) {
+                suggestions.style.display = 'none';
+            }
+        });
+    });
+}
+
+function searchEntity(entityType) {
+    const input = document.getElementById(`${entityType}_name`);
+    const searchTerm = input.value.trim();
+    const suggestionsList = document.getElementById(`${entityType}-suggestions`);
+    
+    if (!searchTerm || searchTerm.length < 2) {
+        suggestionsList.style.display = 'none';
+        return;
+    }
+    
+    // Show loading indicator
+    suggestionsList.innerHTML = '<div class="list-group-item text-muted"><i class="fas fa-spinner fa-spin me-2"></i>Searching...</div>';
+    suggestionsList.style.display = 'block';
+    
+    // Fetch suggestions from API
+    fetch(`{{ url_for('test_campaign.api_get_entity_suggestions', entity_type='') }}${entityType}?q=${encodeURIComponent(searchTerm)}`)
+        .then(response => response.json())
+        .then(data => {
+            suggestionsList.innerHTML = '';
+            
+            if (data.success && data.suggestions && data.suggestions.length > 0) {
+                // Get icons based on entity type
+                let icon = 'fas fa-tag';
+                switch(entityType) {
+                    case 'operator':
+                        icon = 'fas fa-user';
+                        break;
+                    case 'reactor':
+                        icon = 'fas fa-flask';
+                        break;
+                    case 'feed':
+                        icon = 'fas fa-oil-can';
+                        break;
+                    case 'catalyst':
+                        icon = 'fas fa-atom';
+                        break;
+                    case 'customer':
+                        icon = 'fas fa-building';
+                        break;
+                    case 'project':
+                        icon = 'fas fa-project-diagram';
+                        break;
+                }
+                
+                data.suggestions.forEach(suggestion => {
+                    const item = document.createElement('a');
+                    item.classList.add('list-group-item', 'list-group-item-action');
+                    item.innerHTML = `<i class="${icon} me-2"></i>${suggestion.text}`;
+                    item.dataset.value = suggestion.text;
+                    
+                    item.addEventListener('click', function() {
+                        input.value = this.dataset.value;
+                        suggestionsList.style.display = 'none';
+                    });
+                    
+                    suggestionsList.appendChild(item);
+                });
+                
+                suggestionsList.style.display = 'block';
+            } else {
+                // Show no results message
+                const noResults = document.createElement('div');
+                noResults.classList.add('list-group-item', 'text-muted');
+                noResults.innerHTML = `<i class="fas fa-info-circle me-2"></i>No ${entityType}s found matching "${searchTerm}"`;
+                suggestionsList.appendChild(noResults);
+                suggestionsList.style.display = 'block';
+            }
+        })
+        .catch(error => {
+            console.error(`Error searching ${entityType}s:`, error);
+            suggestionsList.innerHTML = `<div class="list-group-item text-muted"><i class="fas fa-exclamation-triangle me-2"></i>Error searching ${entityType}s</div>`;
+            suggestionsList.style.display = 'block';
+        });
+}
+</script>
+{% endblock %} 

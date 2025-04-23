@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}Test Campaign - {{ test_campaign.test_campaign_name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col">
+            <a href="{{ url_for('test_campaign.list_test_campaigns') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Back to List
+            </a>
+        </div>
+        <div class="col-auto">
+            <div class="btn-group">
+                <a href="{{ url_for('test_campaign.edit_test_campaign_form', test_campaign_id=test_campaign.test_campaign_id) }}" class="btn btn-outline-primary">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+                <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category if category != 'message' else 'info' }} alert-dismissible fade show" role="alert">
+                    {% if 'Batch ID:' in message %}
+                        {{ message.split('Batch ID:')[0] }} <strong>Batch ID: <span class="badge bg-{{ category if category == 'success' else 'secondary' }}">{{ message.split('Batch ID:')[1] }}</span></strong>
+                    {% else %}
+                        {{ message }}
+                    {% endif %}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-gradient d-flex justify-content-between align-items-center" style="background-color: #f0f7ff;">
+            <h3 class="mb-0 text-primary">{{ test_campaign.test_campaign_name }}</h3>
+            <span class="badge bg-primary">Batch ID: {{ test_campaign.batch_id }}</span>
+        </div>
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h5 class="border-bottom pb-2 mb-3 text-primary"><i class="fas fa-info-circle me-2"></i>Test Campaign Details</h5>
+                    <dl class="row">
+                        <dt class="col-sm-4 text-muted">ID:</dt>
+                        <dd class="col-sm-8">{{ test_campaign.test_campaign_id }}</dd>
+                        
+                        <dt class="col-sm-4 text-muted">Name:</dt>
+                        <dd class="col-sm-8 fw-bold">{{ test_campaign.test_campaign_name }}</dd>
+                        
+                        <dt class="col-sm-4 text-muted">Batch ID:</dt>
+                        <dd class="col-sm-8"><span class="badge bg-info text-dark">{{ test_campaign.batch_id }}</span></dd>
+                        
+                        <dt class="col-sm-4 text-muted">Created:</dt>
+                        <dd class="col-sm-8"><i class="far fa-calendar-alt me-1"></i>{{ test_campaign.created_at|datetime }}</dd>
+                    </dl>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="border-bottom pb-2 mb-3 text-primary"><i class="fas fa-link me-2"></i>Related Entities</h5>
+                    <dl class="row">
+                        <dt class="col-sm-4 text-muted">Operator:</dt>
+                        <dd class="col-sm-8"><i class="fas fa-user me-1 text-secondary"></i>{{ test_campaign.operator_name }}</dd>
+                        
+                        <dt class="col-sm-4 text-muted">Reactor:</dt>
+                        <dd class="col-sm-8"><i class="fas fa-flask me-1 text-secondary"></i>{{ test_campaign.reactor_name }}</dd>
+                        
+                        <dt class="col-sm-4 text-muted">Feed:</dt>
+                        <dd class="col-sm-8"><i class="fas fa-oil-can me-1 text-secondary"></i>{{ test_campaign.feed_name }}</dd>
+                        
+                        <dt class="col-sm-4 text-muted">Catalyst:</dt>
+                        <dd class="col-sm-8"><i class="fas fa-atom me-1 text-secondary"></i>{{ test_campaign.catalyst_name }}</dd>
+                        
+                        <dt class="col-sm-4 text-muted">Customer:</dt>
+                        <dd class="col-sm-8"><i class="fas fa-building me-1 text-secondary"></i>{{ test_campaign.customer_name }}</dd>
+                        
+                        <dt class="col-sm-4 text-muted">Project:</dt>
+                        <dd class="col-sm-8"><i class="fas fa-project-diagram me-1 text-secondary"></i>{{ test_campaign.project_name }}</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteModalLabel"><i class="fas fa-exclamation-triangle me-2"></i>Confirm Deletion</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete the test campaign <strong>{{ test_campaign.test_campaign_name }}</strong> with batch ID <span class="badge bg-info text-dark">{{ test_campaign.batch_id }}</span>?
+                <div class="alert alert-warning mt-3">
+                    <i class="fas fa-exclamation-triangle"></i> This action cannot be undone.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form action="{{ url_for('test_campaign.delete_test_campaign', test_campaign_id=test_campaign.test_campaign_id) }}" method="POST">
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function() {
+    // Highlight the current page in the navigation
+    $('#nav-test-campaign').addClass('active');
+    
+    // Add animation to the card when page loads
+    $('.card').addClass('animate__animated animate__fadeIn');
+});
+</script>
+{% endblock %}

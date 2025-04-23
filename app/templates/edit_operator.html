@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Operator{% endblock %}
+
+{% block page_title %}Edit Operator: {{ operator.operator_name }}{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm">
+    <div class="card-body">
+        {% if error %}
+        <div class="alert alert-danger" role="alert">
+            {{ error }}
+        </div>
+        {% endif %}
+
+        <form method="post">
+            <div class="mb-3">
+                <label for="operator_name" class="form-label">Operator Name</label>
+                <input type="text" class="form-control" id="operator_name" value="{{ operator.operator_name }}" disabled>
+                <div class="form-text">Operator name cannot be changed.</div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="level" class="form-label">Level*</label>
+                <input type="text" class="form-control" id="level" name="level" value="{{ operator.level }}" required>
+            </div>
+            
+            <div class="d-flex justify-content-between">
+                <a href="{{ url_for('operator.operators_page') }}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary">Update Operator</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %} 

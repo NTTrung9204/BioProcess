@@ -19,11 +19,11 @@ def create_project_table():
         with conn.cursor() as cur:
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS project (
-                    project_id UUID DEFAULT gen_random_uuid() UNIQUE,
-                    project_name VARCHAR(18) PRIMARY KEY CHECK (LENGTH(project_name) >= 6 AND LENGTH(project_name) <= 18),
+                    project_id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+                    project_name VARCHAR(18) UNIQUE CHECK (LENGTH(project_name) >= 6 AND LENGTH(project_name) <= 18),
                     budget NUMERIC(15, 2),
                     project_manager VARCHAR(18) CHECK (LENGTH(project_manager) >= 6 AND LENGTH(project_manager) <= 18),
-                    cust_name VARCHAR(18) REFERENCES customer(cust_name) ON DELETE CASCADE,
+                    customer_id UUID REFERENCES customer(cust_id) ON DELETE CASCADE,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );
             """)
@@ -46,9 +46,9 @@ def get_all_projects():
     try:
         with conn.cursor() as cur:
             cur.execute("""
-                SELECT p.project_id, p.project_name, p.budget, p.project_manager, p.cust_name, p.created_at, c.contact_infor 
+                SELECT p.project_id, p.project_name, p.budget, p.project_manager, cu.cust_name, p.created_at 
                 FROM project p
-                LEFT JOIN customer c ON p.cust_name = c.cust_name
+                LEFT JOIN customer cu ON p.customer_id = cu.cust_id
                 ORDER BY p.project_name
             """)
             projects = cur.fetchall()
@@ -62,7 +62,6 @@ def get_all_projects():
                     "project_manager": project[3],
                     "cust_name": project[4],
                     "created_at": project[5],
-                    "customer_contact": project[6]
                 })
             
             return result
@@ -83,8 +82,9 @@ def get_project_by_id(proj_id):
     try:
         with conn.cursor() as cur:
             cur.execute("""
-                SELECT project_id, project_name, budget, project_manager, cust_name
+                SELECT project_id, project_name, budget, project_manager, cu.cust_name, created_at
                 FROM project
+                LEFT JOIN customer as cu ON cu.cust_id = project.customer_id
                 WHERE project_id = %s
             """, (proj_id,))
             project = cur.fetchone()
@@ -97,7 +97,8 @@ def get_project_by_id(proj_id):
                 'project_name': project[1],
                 'budget': project[2],
                 'project_manager': project[3],
-                'cust_name': project[4]
+                'cust_name': project[4],
+                'created_at': project[5]
             }
             return project_dict
     except Exception as e:
@@ -117,8 +118,9 @@ def get_project_by_name(proj_name):
     try:
         with conn.cursor() as cur:
             cur.execute("""
-                SELECT project_id, project_name, budget, project_manager, cust_name
+                SELECT project_id, project_name, budget, project_manager, cu.cust_name, project.created_at
                 FROM project
+                LEFT JOIN customer as cu ON cu.cust_id = project.customer_id
                 WHERE project_name = %s
             """, (proj_name,))
             project = cur.fetchone()
@@ -131,7 +133,8 @@ def get_project_by_name(proj_name):
                 'project_name': project[1],
                 'budget': project[2],
                 'project_manager': project[3],
-                'cust_name': project[4]
+                'cust_name': project[4],
+                'created_at': project[5]
             }
             return project_dict
     except Exception as e:
@@ -140,7 +143,7 @@ def get_project_by_name(proj_name):
     finally:
         conn.close()
 
-def add_project(proj_name, budget, proj_manager, cust_name):
+def add_project(proj_name, budget, proj_manager, customer_id):
     """
     Add a new project to the database
     """
@@ -165,16 +168,16 @@ def add_project(proj_name, budget, proj_manager, cust_name):
                 return False, "Project name already exists"
             
             # Check if cust_name exists in customer table
-            cur.execute("SELECT COUNT(*) FROM customer WHERE cust_name = %s", (cust_name,))
+            cur.execute("SELECT COUNT(*) FROM customer WHERE cust_id = %s", (customer_id,))
             count = cur.fetchone()[0]
             if count == 0:
                 return False, "Customer does not exist"
             
             # Insert new project
             cur.execute("""
-                INSERT INTO project (project_name, budget, project_manager, cust_name) 
+                INSERT INTO project (project_name, budget, project_manager, customer_id) 
                 VALUES (%s, %s, %s, %s)
-            """, (proj_name, budget, proj_manager, cust_name))
+            """, (proj_name, budget, proj_manager, customer_id))
             conn.commit()
             return True, "Project added successfully"
     except Exception as e:

@@ -14,14 +14,14 @@ def login():
         if error:
             return render_template("login.html", error=error)
         else:
-            return redirect(next_page or url_for("home"))
+            return redirect(next_page or url_for("auth.home"))
         
     return render_template("login.html")
 
 @auth_bp.route('/logout')
 def logout():
     session.pop("username", None)
-    return redirect(url_for("login"))
+    return redirect(url_for("auth.login"))
 
 @auth_bp.route('/')
 @login_required
