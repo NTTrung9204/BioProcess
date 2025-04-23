@@ -21,6 +21,7 @@ def check_login(username, password):
     
     if username in UserConfig.UserDBInstance and UserConfig.UserDBInstance[username] == password:
         session['username'] = name
+        session.permanent = True
 
         next_page = request.args.get('next')
     else:

@@ -1,8 +1,8 @@
 {% extends 'base.html' %}
 
-{% block title %}Contour Plot Web App{% endblock %}
+{% block title %}RESULTS Web App{% endblock %}
 
-{% block page_title %}Contour Plot Tool{% endblock %}
+{% block page_title %}DOE{% endblock %}
 
 {% block head_extra %}
 <style>
@@ -97,9 +97,9 @@
         </form>
     </div>
     <div class="col-md-7 right-panel">
-        <h3>Contour Plot</h3>
+        <h3>RESULTS</h3>
         {% if plot_url %}
-            <img src="data:image/png;base64,{{ plot_url }}" alt="Contour Plot" class="img-fluid">
+            <img src="data:image/png;base64,{{ plot_url }}" alt="RESULTS" class="img-fluid">
         {% else %}
             <p>Please select your features and submit to plot contour.</p>
         {% endif %}

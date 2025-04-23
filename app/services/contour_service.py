@@ -109,7 +109,7 @@ def plot_contour_subplots(
 
             fig.colorbar(contour_filled, ax=ax)
 
-    fig.suptitle("Contour Plot from ML model", fontsize=16)
+    fig.suptitle("RESULTS from ML model", fontsize=16)
     plt.tight_layout(rect=[0, 0, 1, 0.96])
 
     buf = io.BytesIO()

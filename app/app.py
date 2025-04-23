@@ -1,3 +1,4 @@
+from datetime import timedelta
 import gc
 from flask import Flask
 import os
@@ -24,6 +25,7 @@ def create_app():
     app = Flask(__name__)
     # CORS(app)
     app.config["SECRET_KEY"] = "secret!"
+    app.permanent_session_lifetime = timedelta(days=7)
     
     # Register Jinja filters
     @app.template_filter('datetime')

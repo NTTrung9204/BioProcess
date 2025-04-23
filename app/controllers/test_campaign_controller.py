@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify, render_template, url_for, redirect, flash
 import math
+from app.services.auth_service import login_required
 from app.services.test_campaign_service import (
     get_test_campaigns_service,
     get_test_campaigns_paginated_service,
@@ -13,6 +14,7 @@ from app.services.test_campaign_service import (
 test_campaign_bp = Blueprint('test_campaign', __name__, url_prefix='/test-campaign')
 
 @test_campaign_bp.route('/', methods=['GET'])
+@login_required
 def list_test_campaigns():
     """
     Route to list all test campaigns with pagination
@@ -42,6 +44,7 @@ def list_test_campaigns():
     return render_template('test_campaigns.html', test_campaigns=test_campaigns, pagination=pagination)
 
 @test_campaign_bp.route('/api/list', methods=['GET'])
+@login_required
 def api_list_test_campaigns():
     """
     API route to list all test campaigns
@@ -74,6 +77,7 @@ def api_list_test_campaigns():
     })
 
 @test_campaign_bp.route('/new', methods=['GET'])
+@login_required
 def new_test_campaign_form():
     """
     Route to render the form for creating a new test campaign
@@ -81,6 +85,7 @@ def new_test_campaign_form():
     return render_template('add_test_campaigns.html')
 
 @test_campaign_bp.route('/<test_campaign_id>', methods=['GET'])
+@login_required
 def view_test_campaign(test_campaign_id):
     test_campaign = get_test_campaign_service(test_campaign_id)
     
@@ -91,6 +96,7 @@ def view_test_campaign(test_campaign_id):
     return render_template('test_campaigns_detail.html', test_campaign=test_campaign)
 
 @test_campaign_bp.route('/api/<test_campaign_id>', methods=['GET'])
+@login_required
 def api_get_test_campaign(test_campaign_id):
     """
     API route to get a single test campaign
@@ -110,6 +116,7 @@ def api_get_test_campaign(test_campaign_id):
     return jsonify({'success': True, 'test_campaign': result[1]})
 
 @test_campaign_bp.route('/edit/<test_campaign_id>', methods=['GET'])
+@login_required
 def edit_test_campaign_form(test_campaign_id):
     test_campaign = get_test_campaign_service(test_campaign_id)
     
@@ -120,6 +127,7 @@ def edit_test_campaign_form(test_campaign_id):
     return render_template('edit_test_campaign.html', test_campaign=test_campaign)
 
 @test_campaign_bp.route('/api/create', methods=['POST'])
+@login_required
 def api_create_test_campaign():
     """
     API route to create a new test campaign
@@ -154,6 +162,7 @@ def api_create_test_campaign():
     })
 
 @test_campaign_bp.route('/create', methods=['POST'])
+@login_required
 def create_test_campaign():
     """
     Route to create a new test campaign
@@ -187,6 +196,7 @@ def create_test_campaign():
     return redirect(url_for('test_campaign.view_test_campaign', test_campaign_id=result[2]))
 
 @test_campaign_bp.route('/api/update/<test_campaign_id>', methods=['PUT'])
+@login_required
 def api_update_test_campaign(test_campaign_id):
     """
     API route to update a test campaign
@@ -229,6 +239,7 @@ def api_update_test_campaign(test_campaign_id):
     })
 
 @test_campaign_bp.route('/update/<test_campaign_id>', methods=['POST'])
+@login_required
 def update_test_campaign(test_campaign_id):
     """
     Route to update a test campaign
@@ -267,6 +278,7 @@ def update_test_campaign(test_campaign_id):
     return redirect(url_for('test_campaign.view_test_campaign', test_campaign_id=test_campaign_id))
 
 @test_campaign_bp.route('/api/delete/<test_campaign_id>', methods=['DELETE'])
+@login_required
 def api_delete_test_campaign(test_campaign_id):
     """
     API route to delete a test campaign
@@ -286,6 +298,7 @@ def api_delete_test_campaign(test_campaign_id):
     return jsonify({'success': True, 'message': 'Test campaign deleted successfully'})
 
 @test_campaign_bp.route('/delete/<test_campaign_id>', methods=['POST'])
+@login_required
 def delete_test_campaign(test_campaign_id):
     """
     Route to delete a test campaign
@@ -307,6 +320,7 @@ def delete_test_campaign(test_campaign_id):
     return redirect(url_for('test_campaign.list_test_campaigns'))
 
 @test_campaign_bp.route('/api/entity-suggestions/<entity_type>', methods=['GET'])
+@login_required
 def api_get_entity_suggestions(entity_type):
     """
     API route to get entity name suggestions based on search term

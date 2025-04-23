@@ -11,10 +11,12 @@ raman_bp = Blueprint('raman', __name__, url_prefix='/raman')
 active_streams = {}
 
 @raman_bp.route('/')
+@login_required
 def raman_form():
     return render_template('raman.html')
 
 @raman_bp.route('/process_batch', methods=['POST'])
+@login_required
 def process_batch():
     batch_id = request.form.get('batch_id')
     session_id = request.form.get('session_id')
@@ -25,6 +27,7 @@ def process_batch():
     return jsonify({'message': 'Processing started', 'batch_id': batch_id}), 200
 
 @raman_bp.route('/plot', methods=['GET', 'POST'])
+@login_required
 def raman_plot():
     if request.method == 'GET':
         return render_template('raman_plot.html')

@@ -23,6 +23,7 @@ def api_get_customer(cust_name):
         return jsonify({"success": False, "message": "Customer not found"}), 404
 
 @api_bp.route('/search-customers')
+@login_required
 def search_customers():
     search_term = request.args.get('term', '')
     customers = search_customers_service(search_term)
