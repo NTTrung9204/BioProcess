@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Catalyst Composition{% endblock %}
+
+{% block page_title %}Edit Composition for: {{ catalyst.catalyst_name }}{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <a href="{{ url_for('catalyst_composition.manage_compositions_page', catalyst_id=catalyst.catalyst_id) }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Compositions
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Edit Composition Relationship</h5>
+            </div>
+            <div class="card-body">
+                {% if error %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error }}
+                </div>
+                {% endif %}
+
+                <form method="post">
+                    <div class="mb-3">
+                        <label class="form-label">Composition Name</label>
+                        <input type="text" class="form-control" value="{{ relation.composition_name }}" readonly>
+                        <div class="form-text">
+                            Available Quantity: {{ relation.available_quantity }}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="percentage" class="form-label">Percentage (0-1)*</label>
+                        {% set max_allowed = remaining_percentage + relation.percentage %}
+                        <input type="number" class="form-control" id="percentage" name="percentage" value="{{ relation.percentage }}" 
+                               placeholder="Value between 0 and 1 (e.g., 0.4 for 40%)" step="0.01" min="0.01" max="{{ max_allowed }}" required>
+                        <div class="form-text">
+                            Current: {{ (relation.percentage * 100)|round(2) }}%. 
+                            Max allowed: {{ (max_allowed * 100)|round(2) }}% ({{ max_allowed|round(4) }})
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="quantity_used" class="form-label">Quantity Used*</label>
+                        <input type="number" class="form-control" id="quantity_used" name="quantity_used" value="{{ relation.quantity_used }}" 
+                               placeholder="Quantity to use for this catalyst" step="0.01" min="0.01" required>
+                        <div class="form-text">
+                            Available quantity: {{ relation.available_quantity }}
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('catalyst_composition.manage_compositions_page', catalyst_id=catalyst.catalyst_id) }}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">Update Composition</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">Current Composition Summary</h5>
+            </div>
+            <div class="card-body">
+                <div class="progress mb-3" style="height: 25px">
+                    <div 
+                        class="progress-bar" 
+                        role="progressbar" 
+                        style="width: {{ (catalyst.total_percentage * 100)|round(2) }}%" 
+                        aria-valuenow="{{ (catalyst.total_percentage * 100)|round(2) }}" 
+                        aria-valuemin="0" 
+                        aria-valuemax="100"
+                    >
+                        {{ (catalyst.total_percentage * 100)|round(2) }}%
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <strong>Current Total:</strong> {{ (catalyst.total_percentage * 100)|round(2) }}%
+                </div>
+                <div class="mb-3">
+                    <strong>Remaining:</strong> {{ (remaining_percentage * 100)|round(2) }}%
+                    <div class="form-text text-muted">
+                        (Not including this composition's current percentage)
+                    </div>
+                </div>
+
+                {% if catalyst.compositions %}
+                <h6 class="mt-4">All Compositions:</h6>
+                <ul class="list-group">
+                    {% for comp in catalyst.compositions %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center {{ 'list-group-item-primary' if comp.id == relation.id }}">
+                        {{ comp.name }}
+                        <div>
+                            <span class="badge bg-{{ 'primary' if comp.id != relation.id else 'warning' }} rounded-pill">{{ (comp.percentage * 100)|round(2) }}%</span>
+                            <span class="badge bg-secondary rounded-pill">{{ comp.quantity_used }} units</span>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

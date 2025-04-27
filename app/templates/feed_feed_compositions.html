@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+
+{% block title %}feed Compositions{% endblock %}
+
+{% block page_title %}feed Compositions for: {{ feed.feed_name }}{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <a href="{{ url_for('feed.feeds_page') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to feeds
+        </a>
+        <a href="{{ url_for('feed_composition.add_composition_to_feed_page', feed_id=feed.feed_id) }}" class="btn btn-primary">
+            <i class="fas fa-plus-circle"></i> Add Composition
+        </a>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">feed Info</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <strong>feed Name:</strong> {{ feed.feed_name }}
+                </div>
+                <div class="mb-3">
+                    <strong>Provider:</strong> {{ feed.provider if feed.provider else 'N/A' }}
+                </div>
+                <div class="mb-3">
+                    <strong>Created At:</strong> {{ feed.created_at.strftime('%Y-%m-%d %H:%M:%S') if feed.created_at else '' }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">Composition Summary</h5>
+            </div>
+            <div class="card-body">
+                <div class="progress mb-3" style="height: 25px">
+                    <div class="progress-bar" role="progressbar" style="width: {{ (feed.total_percentage * 100)|round(2) }}%" aria-valuenow="{{ (feed.total_percentage * 100)|round(2) }}" aria-valuemin="0" aria-valuemax="100">
+                        {{ (feed.total_percentage * 100)|round(2) }}%
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <strong>Total Percentage:</strong> {{ (feed.total_percentage * 100)|round(2) }}%
+                </div>
+                <div class="mb-3">
+                    <strong>Remaining:</strong> {{ (remaining_percentage * 100)|round(2) }}%
+                </div>
+                {% if feed.total_percentage == 1.0 %}
+                <div class="alert alert-success">
+                    <i class="fas fa-check"></i> All compositions add up to 100%
+                </div>
+                {% else %}
+                <div class="alert alert-{{ 'warning' if feed.total_percentage < 1.0 else 'danger' }}">
+                    <i class="fas fa-exclamation-triangle"></i> 
+                    {% if feed.total_percentage < 1.0 %}
+                    Compositions only add up to {{ (feed.total_percentage * 100)|round(2) }}%. Please add more compositions.
+                    {% else %}
+                    Compositions exceed 100%. Please adjust percentages.
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if feed.compositions %}
+<div class="card shadow-sm">
+    <div class="card-header bg-dark text-white">
+        <h5 class="mb-0">Compositions</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Composition</th>
+                        <th>Percentage</th>
+                        <th>Quantity Used</th>
+                        <th>Added At</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for comp in feed.compositions %}
+                    <tr>
+                        <td>{{ comp.id }}</td>
+                        <td>{{ comp.name }}</td>
+                        <td>{{ (comp.percentage * 100)|round(2) }}%</td>
+                        <td>{{ comp.quantity_used }}</td>
+                        <td>{{ comp.created_at if comp.created_at else '' }}</td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <a href="{{ url_for('feed_composition.edit_feed_composition_page', relation_id=comp.id) }}" class="btn btn-sm btn-info text-white">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                                <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ loop.index }}">
+                                    <i class="fas fa-trash"></i> Remove
+                                </button>
+                            </div>
+
+                            <div class="modal fade" id="deleteModal{{ loop.index }}" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="deleteModalLabel">Confirm Remove</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            Are you sure you want to remove the composition <strong>{{ comp.name }}</strong> from this feed?
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                            <form action="{{ url_for('feed_composition.remove_composition_from_feed_page', relation_id=comp.id) }}" method="post">
+                                                <button type="submit" class="btn btn-danger">Remove</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="alert alert-info">
+    No compositions found for this feed. Please add compositions to reach 100%.
+</div>
+{% endif %}
+
+{% endblock %} 

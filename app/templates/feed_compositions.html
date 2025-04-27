@@ -1,83 +1,22 @@
 {% extends 'base.html' %}
 
-{% block title %}Feed Compositions{% endblock %}
+{% block title %}Compositions{% endblock %}
 
-{% block page_title %}Feed Compositions for: {{ feed.feed_name }}{% endblock %}
+{% block page_title %}Compositions Management{% endblock %}
 
 {% block content %}
 <div class="row mb-4">
     <div class="col">
-        <a href="{{ url_for('feed.feeds_page') }}" class="btn btn-secondary">
-            <i class="fas fa-arrow-left"></i> Back to Feeds
-        </a>
-        <a href="{{ url_for('feed_composition.add_composition_page', feed_id=feed.feed_id) }}" class="btn btn-primary">
-            <i class="fas fa-plus-circle"></i> Add Composition
+        <a href="{{ url_for('feed_composition.add_composition_page') }}" class="btn btn-primary">
+            <i class="fas fa-plus-circle"></i> Add New Composition
         </a>
     </div>
 </div>
 
-<div class="row mb-4">
-    <div class="col-md-6">
-        <div class="card shadow-sm">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0">Feed Info</h5>
-            </div>
-            <div class="card-body">
-                <div class="mb-3">
-                    <strong>Feed Name:</strong> {{ feed.feed_name }}
-                </div>
-                <div class="mb-3">
-                    <strong>Provider:</strong> {{ feed.provider }}
-                </div>
-                <div class="mb-3">
-                    <strong>Created At:</strong> {{ feed.created_at.strftime('%Y-%m-%d %H:%M:%S') if feed.created_at else '' }}
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-6">
-        <div class="card shadow-sm">
-            <div class="card-header bg-info text-white">
-                <h5 class="mb-0">Composition Summary</h5>
-            </div>
-            <div class="card-body">
-                <div class="progress mb-3" style="height: 25px;">
-                    <div class="progress-bar" role="progressbar" style="width: {{ (feed.total_percentage * 100)|round(2) }}%;" 
-                         aria-valuenow="{{ (feed.total_percentage * 100)|round(2) }}" aria-valuemin="0" aria-valuemax="100">
-                         {{ (feed.total_percentage * 100)|round(2) }}%
-                    </div>
-                </div>
-
-                <div class="mb-3">
-                    <strong>Total Percentage:</strong> {{ (feed.total_percentage * 100)|round(2) }}%
-                </div>
-                <div class="mb-3">
-                    <strong>Remaining:</strong> {{ (remaining_percentage * 100)|round(2) }}%
-                </div>
-                {% if feed.total_percentage == 1.0 %}
-                <div class="alert alert-success">
-                    <i class="fas fa-check"></i> All compositions add up to 100%
-                </div>
-                {% else %}
-                <div class="alert alert-{{ 'warning' if feed.total_percentage < 1.0 else 'danger' }}">
-                    <i class="fas fa-exclamation-triangle"></i> 
-                    {% if feed.total_percentage < 1.0 %}
-                    Compositions only add up to {{ (feed.total_percentage * 100)|round(2) }}%. Please add more compositions.
-                    {% else %}
-                    Compositions exceed 100%. Please adjust percentages.
-                    {% endif %}
-                </div>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-</div>
-
-{% if feed.compositions %}
+{% if compositions %}
 <div class="card shadow-sm">
     <div class="card-header bg-dark text-white">
-        <h5 class="mb-0">Compositions</h5>
+        <h5 class="mb-0">Feed Compositions</h5>
     </div>
     <div class="card-body">
         <div class="table-responsive">
@@ -85,21 +24,33 @@
                 <thead class="table-dark">
                     <tr>
                         <th>ID</th>
-                        <th>Composition</th>
-                        <th>Percentage</th>
-                        <th>Provider</th>
-                        <th>Created At</th>
+                        <th>Name</th>
+                        <th>Quantity</th>
+                        <th>Quantity Used</th>
+                        <th>Properties</th>
+                        <th>Created Date</th>
                         <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for comp in feed.compositions %}
+                    {% for comp in compositions %}
                     <tr>
                         <td>{{ comp.id }}</td>
-                        <td>{{ comp.composition }}</td>
-                        <td>{{ (comp.percentage * 100)|round(2) }}%</td>
-                        <td>{{ comp.provider }}</td>
-                        <td>{{ comp.created_at.strftime('%Y-%m-%d %H:%M:%S') if comp.created_at else '' }}</td>
+                        <td>{{ comp.name }}</td>
+                        <td>{{ comp.quantity }}</td>
+                        <td>{{ comp.quantity_used }}</td>
+                        <td>
+                            <small>
+                                {% if comp.viscosity %}Viscosity: {{ comp.viscosity }}<br>{% endif %}
+                                {% if comp.pH %}pH: {{ comp.pH }}<br>{% endif %}
+                                {% if comp.density %}Density: {{ comp.density }}<br>{% endif %}
+                                {% if comp.water %}Water: {{ comp.water }}<br>{% endif %}
+                                {% if comp.provider %}Provider: {{ comp.provider }}<br>{% endif %}
+                                {% if comp.impurity %}Impurity: {{ comp.impurity }}<br>{% endif %}
+                                {% if comp.proportion %}Proportion: {{ comp.proportion }}{% endif %}
+                            </small>
+                        </td>
+                        <td>{{ comp.updated_at.strftime('%Y-%m-%d %H:%M:%S') if comp.updated_at else comp.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
                         <td>
                             <div class="btn-group" role="group">
                                 <a href="{{ url_for('feed_composition.edit_composition_page', composition_id=comp.id) }}" class="btn btn-sm btn-info text-white">
@@ -118,12 +69,17 @@
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
                                         <div class="modal-body">
-                                            Are you sure you want to delete the composition <strong>{{ comp.composition }}</strong>?
+                                            Are you sure you want to delete the composition <strong>{{ comp.name }}</strong>?
+                                            {% if comp.is_used %}
+                                            <div class="alert alert-warning mt-2">
+                                                <i class="fas fa-exclamation-triangle"></i> This composition is currently being used in one or more feeds and cannot be deleted.
+                                            </div>
+                                            {% endif %}
                                         </div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                                             <form action="{{ url_for('feed_composition.delete_composition_page', composition_id=comp.id) }}" method="post">
-                                                <button type="submit" class="btn btn-danger">Delete</button>
+                                                <button type="submit" class="btn btn-danger" {% if comp.is_used %}disabled{% endif %}>Delete</button>
                                             </form>
                                         </div>
                                     </div>
@@ -139,7 +95,7 @@
 </div>
 {% else %}
 <div class="alert alert-info">
-    No compositions found for this feed. Please add compositions to reach 100%.
+    No compositions found. Please add compositions to use in your feeds.
 </div>
 {% endif %}
 

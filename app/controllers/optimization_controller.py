@@ -9,7 +9,6 @@ import optuna
 import numpy as np
 import time
 
-# Biến này sẽ được gán trong hàm register_socket_handlers
 socketio = None
 
 # Blueprint for optimization routes
@@ -30,6 +29,10 @@ def contour_plot():
         y_feature = request.form.get('y_feature')
         row_feature = request.form.get('row_feature')
         col_feature = request.form.get('col_feature')
+
+        default_fixed_values = {}
+        for feature in PostgresConfig.PILOT_COLUMNS:
+            default_fixed_values[feature] = request.form.get(feature + "_fix", "").strip()
         
         selected_features = [x_feature, y_feature, row_feature, col_feature]
         if len(selected_features) != len(set(selected_features)) or '' in selected_features:
@@ -46,7 +49,7 @@ def contour_plot():
                 error="Select four different features for X, Y, row, and col.", 
                 data=data,
                 features=PostgresConfig.PILOT_COLUMNS,
-                default_fixed_values=Constants.get_default_values(),
+                default_fixed_values=default_fixed_values,
                 selected={"x": x_feature, "y": y_feature, "row": row_feature, "col": col_feature}
             )
         
@@ -58,7 +61,7 @@ def contour_plot():
                 error=error, 
                 data=data,
                 features=PostgresConfig.PILOT_COLUMNS,
-                default_fixed_values=Constants.get_default_values(),
+                default_fixed_values=default_fixed_values,
                 selected={"x": x_feature, "y": y_feature, "row": row_feature, "col": col_feature}
             )
 
@@ -67,7 +70,7 @@ def contour_plot():
             plot_url=plot_img, 
             data=data,
             features=PostgresConfig.PILOT_COLUMNS,
-            default_fixed_values=Constants.get_default_values(),
+            default_fixed_values=default_fixed_values,
             selected={"x": x_feature, "y": y_feature, "row": row_feature, "col": col_feature}
         )
 
@@ -95,6 +98,10 @@ def bayesian_optimization():
         feature_2 = request.form.get('feature_2')
         feature_3 = request.form.get('feature_3')
         feature_4 = request.form.get('feature_4')
+
+        default_fixed_values = {}
+        for feature in PostgresConfig.PILOT_COLUMNS:
+            default_fixed_values[feature] = request.form.get(feature + "_fix", "").strip()
     
         optim_param_ranges, fixed_params, error, data = process_optimization_data(request.form)
 
@@ -104,7 +111,7 @@ def bayesian_optimization():
                 error=error, 
                 data=data,         
                 features=PostgresConfig.PILOT_COLUMNS,
-                default_fixed_values=Constants.get_default_values(),
+                default_fixed_values=default_fixed_values,
                 selected={"f1": feature_1, "f2": feature_2, "f3": feature_3, "f4": feature_4}
             )
 
@@ -115,7 +122,7 @@ def bayesian_optimization():
             "bayesian_optimization.html",
             data=data,
             features=PostgresConfig.PILOT_COLUMNS,
-            default_fixed_values=Constants.get_default_values(),
+            default_fixed_values=default_fixed_values,
             selected={"f1": feature_1, "f2": feature_2, "f3": feature_3, "f4": feature_4},
             message="Running optimization. Please monitor the real-time chart on the right.",
         )

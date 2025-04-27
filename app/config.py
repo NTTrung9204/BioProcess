@@ -54,7 +54,7 @@ class PostgresConfig:
     TABLE_NAME_TEMP = os.getenv("TABLE_NAME_TEMP", "temp_pilot")
 
     TIMESTAMP = os.getenv("TIMESTAMP", "timestamp")
-    SCAN = os.getenv("SCAN", "scan")
+    # SCAN = os.getenv("SCAN", "scan")
     # CUST = os.getenv("CUST", "cust")
     # SAMPLE_ID = os.getenv("SAMPLE_ID", "sample_id")
     # TEST_CAMPAING_ID = os.getenv("TEST_CAMPAING_ID", "test_campaing_id")
@@ -107,7 +107,7 @@ class PostgresConfig:
 
     _COMMON_COLUMNS = [
         f"{TIMESTAMP} TIMESTAMP UNIQUE",
-        f"{SCAN} INTEGER DEFAULT 0",
+        # f"{SCAN} INTEGER DEFAULT 0",
         # f"{CUST} TEXT DEFAULT NULL",
         # f"{SAMPLE_ID} TEXT DEFAULT NULL",
         # f"{TEST_CAMPAING_ID} TEXT DEFAULT NULL",
